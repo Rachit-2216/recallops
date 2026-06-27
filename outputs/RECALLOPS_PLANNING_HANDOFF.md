@@ -39,6 +39,10 @@ operations:
 
 ## Next action
 
-Open a new Codex chat in this folder and paste the complete contents of
-`START_CODING_PROMPT.md`. Plan mode is not required; the next chat should
-execute the approved plan immediately.
+Open `D:\AI\cognee_hackathon` in Cursor, start a new sidebar chat, and send:
+
+> Read `START_CODING_PROMPT.md` completely and execute it. Begin with Task 1
+> and continue autonomously.
+
+The files are already in the project folder after relocation, so nothing else
+needs to be pasted or copied. Plan mode is not required.

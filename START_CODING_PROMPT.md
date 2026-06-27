@@ -1,9 +1,9 @@
 # RecallOps Coding Chat Prompt
 
-Copy everything below the divider into a new Codex chat opened in this exact
-folder:
+Copy everything below the divider into a new Codex or Cursor sidebar chat
+opened in this exact folder:
 
-`C:\Users\Rachit Shrivastava\Documents\Codex\2026-06-27\https-www-wemakedevs-org-hackathons-cognee`
+`D:\AI\cognee_hackathon`
 
 ---
 
@@ -32,6 +32,9 @@ not already configured.
 - Use `superpowers:systematic-debugging` for any unexpected failure.
 - Use `superpowers:verification-before-completion` before claiming a milestone
   or the project complete.
+- If those named skills are unavailable in the current client, follow their
+  stated test-first, plan-execution, debugging, and verification behavior
+  directly instead of stopping.
 - Use the relevant Cognee skill when making or diagnosing live Cognee calls.
 - Do not use subagents unless I explicitly authorize subagents in this chat.
 - Make the small commits specified in the plan.
