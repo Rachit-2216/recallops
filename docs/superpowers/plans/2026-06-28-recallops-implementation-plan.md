@@ -1704,7 +1704,7 @@ Expected: tests and build pass.
 - Create: `frontend/src/features/memory/ForgetDialog.tsx`
 - Create: `frontend/src/features/memory/ForgetDialog.test.tsx`
 
-- [ ] **Step 1: Write provenance rendering tests**
+- [x] **Step 1: Write provenance rendering tests**
 
 For a referenced trace, assert visible:
 
@@ -1718,13 +1718,13 @@ For a referenced trace, assert visible:
 
 For missing references, assert `unverified` and no promote action.
 
-- [ ] **Step 2: Implement RecallResult and inspector**
+- [x] **Step 2: Implement RecallResult and inspector**
 
 Answer content must be plain rendered text, not raw HTML. Reference buttons
 open the inspector at the exact document/chunk. Use semantic `<aside>`,
 `<details>`, and accessible tabs for **Evidence**, **Path**, and **Lifecycle**.
 
-- [ ] **Step 3: Write destructive-action tests**
+- [x] **Step 3: Write destructive-action tests**
 
 The forget dialog must:
 
@@ -1736,13 +1736,13 @@ The forget dialog must:
 - show before/after reference result
 - remain open with error if verification fails
 
-- [ ] **Step 4: Implement item-level forget UI**
+- [x] **Step 4: Implement item-level forget UI**
 
 Only permanent `ready` evidence exposes **Forget memory**. Session hypotheses
 expose **Reject hypothesis**, which is a local/session lifecycle action and does
 not call the forget endpoint. This distinction must be visible in copy.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 Run:
 

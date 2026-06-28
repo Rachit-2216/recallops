@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BrainCircuit, Database, Network } from "lucide-react";
+import { BrainCircuit, Database } from "lucide-react";
 import { useSearchParams, useParams } from "react-router-dom";
 
 import {
@@ -10,6 +10,7 @@ import {
 } from "../../api/recallops";
 import { OperationBanner } from "../../components/OperationBanner";
 import { StatusBadge } from "../../components/StatusBadge";
+import { MemoryInspector } from "../memory/MemoryInspector";
 import { IncidentHeader } from "./IncidentHeader";
 import { ObservationComposer } from "./ObservationComposer";
 import { ObservationTimeline } from "./ObservationTimeline";
@@ -165,17 +166,10 @@ export function IncidentCockpit() {
           />
         ) : null}
         {recall.data ? (
-          <section className="recall-preview" aria-live="polite">
-            <div>
-              <Network size={15} aria-hidden="true" />
-              <span>{recall.data.verification}</span>
-            </div>
-            <p>{recall.data.answer ?? "No referenced result was found."}</p>
-            <small>
-              {recall.data.references.length} evidence references ·{" "}
-              {recall.data.source ?? "no source"}
-            </small>
-          </section>
+          <MemoryInspector
+            result={recall.data}
+            sessionHypotheses={detail.memory_candidates}
+          />
         ) : (
           <div className="inspector-empty">
             <Database size={24} aria-hidden="true" />

@@ -121,6 +121,15 @@ const demoSeedSchema = z.object({
   ready: z.boolean(),
 });
 
+const forgetResultSchema = z.object({
+  data_id: z.string(),
+  status: z.literal("forgotten"),
+  before_reference_found: z.boolean(),
+  after_reference_found: z.boolean(),
+});
+
+export type ForgetResult = z.infer<typeof forgetResultSchema>;
+
 export const recallOpsApi = {
   listEvidence(signal?: AbortSignal) {
     return request("/api/evidence", {
@@ -174,5 +183,18 @@ export const recallOpsApi = {
       references: result.references ?? [],
       why_recalled: result.why_recalled ?? [],
     };
+  },
+  forgetEvidence(
+    item: EvidenceItem,
+    verificationQuery = `"${item.name}"`,
+  ) {
+    return request(`/api/evidence/${item.data_id}`, {
+      method: "DELETE",
+      body: {
+        confirmation: `FORGET ${item.name}`,
+        verification_query: verificationQuery,
+      },
+      schema: forgetResultSchema,
+    });
   },
 };
