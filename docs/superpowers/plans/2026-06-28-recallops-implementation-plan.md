@@ -506,7 +506,7 @@ git commit -m "feat: add safe application configuration and health"
 - Create: `backend/tests/unit/test_domain.py`
 - Create: `backend/tests/unit/test_database.py`
 
-- [ ] **Step 1: Write failing domain transition tests**
+- [x] **Step 1: Write failing domain transition tests**
 
 Create tests that assert:
 
@@ -542,7 +542,7 @@ uv run pytest backend/tests/unit/test_domain.py -v
 
 Expected: FAIL because domain types do not exist.
 
-- [ ] **Step 2: Implement domain enums and transition policy**
+- [x] **Step 2: Implement domain enums and transition policy**
 
 Define string enums for:
 
@@ -561,7 +561,7 @@ Define string enums for:
 Encode allowed candidate transitions as an immutable mapping. Raise
 `InvalidTransition` for invalid incident resolution or candidate movement.
 
-- [ ] **Step 3: Write failing persistence tests**
+- [x] **Step 3: Write failing persistence tests**
 
 Use an async in-memory SQLite engine and assert:
 
@@ -579,7 +579,7 @@ async def test_initial_schema_persists_incident_and_evidence(session: AsyncSessi
     assert await session.get(EvidenceItem, STALE_DATA_ID) is not None
 ```
 
-- [ ] **Step 4: Implement SQLAlchemy models and migration**
+- [x] **Step 4: Implement SQLAlchemy models and migration**
 
 Create tables:
 
@@ -599,7 +599,7 @@ Use UUID strings for portable SQLite behavior. Add unique constraints for
 timestamps and explicit relationships with cascade only for local dependent
 records. The migration must create all tables from an empty database.
 
-- [ ] **Step 5: Verify the migration and tests**
+- [x] **Step 5: Verify the migration and tests**
 
 Run:
 
@@ -612,7 +612,7 @@ uv run alembic -c backend/alembic.ini upgrade head
 
 Expected: migration succeeds in both directions; tests pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add backend
