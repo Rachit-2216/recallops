@@ -1,3 +1,4 @@
+import json
 from typing import Literal, Protocol
 
 from fastapi import APIRouter, HTTPException, Request, status
@@ -227,6 +228,12 @@ async def get_incident(incident_id: str, request: Request) -> dict[str, object]:
                     "mitigation": resolution.mitigation,
                     "verification": resolution.verification,
                     "promotion_state": resolution.promotion_state,
+                    "confirmed_at": (
+                        resolution.confirmed_at.isoformat()
+                        if resolution.confirmed_at is not None
+                        else None
+                    ),
+                    "trace_ids": json.loads(resolution.trace_ids_json or "[]"),
                 }
                 if resolution is not None
                 else None

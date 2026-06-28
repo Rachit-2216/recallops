@@ -1,10 +1,11 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
 
 import { AppShell } from "./app/AppShell";
-import { RoutePlaceholder } from "./components/RoutePlaceholder";
 import { DemoHome } from "./features/demo/DemoHome";
 import { EvidenceLibrary } from "./features/evidence/EvidenceLibrary";
 import { IncidentCockpit } from "./features/incidents/IncidentCockpit";
+import { ResolutionReport } from "./features/incidents/ResolutionReport";
+import { MemoryExplorer } from "./features/memory/MemoryExplorer";
 
 export const router = createBrowserRouter([
   {
@@ -29,18 +30,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "memory",
-        element: (
-          <RoutePlaceholder eyebrow="Graph memory" title="Memory explorer" />
-        ),
+        element: <MemoryExplorer />,
       },
       {
         path: "resolutions/:incidentId",
-        element: (
-          <RoutePlaceholder
-            eyebrow="Verified learning"
-            title="Resolution report"
-          />
-        ),
+        element: <ResolutionReport />,
       },
     ],
   },

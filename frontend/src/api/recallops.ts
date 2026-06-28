@@ -90,6 +90,8 @@ const incidentDetailSchema = z.object({
       mitigation: z.string(),
       verification: z.string(),
       promotion_state: z.string(),
+      confirmed_at: z.string().nullable().optional(),
+      trace_ids: z.array(z.string()).optional(),
     })
     .nullable(),
   budget: z.object({
@@ -101,6 +103,27 @@ const incidentDetailSchema = z.object({
 export type IncidentDetail = z.infer<typeof incidentDetailSchema>;
 export type Observation = z.infer<typeof observationSchema>;
 export type RecallResult = z.infer<typeof recallResultSchema>;
+
+export type ResolutionRequest = {
+  root_cause: string;
+  mitigation: string;
+  verification: string;
+  trace_ids: string[];
+  confirmed_by_human: boolean;
+};
+
+const resolutionResponseSchema = z.object({
+  incident_id: z.string(),
+  incident_status: z.string(),
+  promotion_state: z.enum(["promotion_pending", "promotion_failed", "promoted"]),
+  root_cause: z.string(),
+  mitigation: z.string(),
+  verification: z.string(),
+  confirmed_at: z.string().nullable(),
+  trace_ids: z.array(z.string()),
+});
+
+export type ResolutionResponse = z.infer<typeof resolutionResponseSchema>;
 
 const evidenceListSchema = z.object({
   items: z.array(evidenceItemSchema),
@@ -195,6 +218,25 @@ export const recallOpsApi = {
         verification_query: verificationQuery,
       },
       schema: forgetResultSchema,
+    });
+  },
+  resolveIncident(incidentId: string, body: ResolutionRequest) {
+    return request(`/api/incidents/${incidentId}/resolve`, {
+      method: "POST",
+      body,
+      schema: resolutionResponseSchema,
+    });
+  },
+  createIncident(body: {
+    id: string;
+    title: string;
+    severity: string;
+    service: string;
+  }) {
+    return request("/api/incidents", {
+      method: "POST",
+      body,
+      schema: incidentSchema,
     });
   },
 };

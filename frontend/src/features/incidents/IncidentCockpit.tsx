@@ -15,6 +15,7 @@ import { IncidentHeader } from "./IncidentHeader";
 import { ObservationComposer } from "./ObservationComposer";
 import { ObservationTimeline } from "./ObservationTimeline";
 import { RecallComposer } from "./RecallComposer";
+import { ResolutionPanel } from "./ResolutionPanel";
 
 type ObserveInput = { content: string; observationId: string };
 
@@ -131,6 +132,13 @@ export function IncidentCockpit() {
             })
           }
         />
+        {recall.data?.verification === "referenced" &&
+        recall.data.trace_id ? (
+          <ResolutionPanel
+            incidentId={incidentId}
+            traceIds={[recall.data.trace_id]}
+          />
+        ) : null}
       </section>
 
       <aside

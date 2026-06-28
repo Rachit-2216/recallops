@@ -1768,7 +1768,7 @@ Expected: tests and build pass.
 - Create: `frontend/src/features/incidents/ResolutionPanel.test.tsx`
 - Create: `frontend/src/features/incidents/ResolutionReport.tsx`
 
-- [ ] **Step 1: Define the graph view model**
+- [x] **Step 1: Define the graph view model**
 
 Use explicit node types:
 
@@ -1794,7 +1794,7 @@ type MemoryEdge = {
 Every rendered edge must point to a stored evidence data ID. No decorative or
 model-invented relationships.
 
-- [ ] **Step 2: Write graph tests**
+- [x] **Step 2: Write graph tests**
 
 Assert seeded path:
 
@@ -1808,7 +1808,7 @@ session misses -> resembles -> INC-1842
 Clicking an edge opens its evidence reference. Removing the stale item removes
 only its associated edge/reference, not unrelated shared nodes.
 
-- [ ] **Step 3: Implement resolution form tests**
+- [x] **Step 3: Implement resolution form tests**
 
 Form requires root cause, mitigation, verification, one referenced trace, and
 human confirmation. On submit:
@@ -1818,13 +1818,13 @@ human confirmation. On submit:
 - failure shows `promotion_failed` and retry
 - never says learned before success
 
-- [ ] **Step 4: Implement resolution report**
+- [x] **Step 4: Implement resolution report**
 
 Show verified facts, evidence citations, human confirmation time, improve
 operation result, and a **Prove in clean session** action that asks the fixed
 question from a new session and displays the resulting permanent-memory source.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 Run:
 
