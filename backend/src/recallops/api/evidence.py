@@ -1,7 +1,10 @@
 from dataclasses import asdict
+from pathlib import PurePosixPath
 from typing import Annotated
+from urllib.parse import unquote, urlsplit
 from uuid import uuid4
 
+import httpx
 from fastapi import (
     APIRouter,
     File,
@@ -18,6 +21,7 @@ from recallops.domain.models import EvidenceItem
 from recallops.repositories.audit import AuditRepository
 from recallops.repositories.evidence import EvidenceRepository
 from recallops.services.evidence import (
+    LOCAL_LIMIT,
     EvidenceService,
     EvidenceTooLarge,
     MemoryIngestionFailed,
@@ -38,6 +42,13 @@ router = APIRouter(prefix="/api/evidence", tags=["evidence"])
 class ForgetEvidenceRequest(BaseModel):
     confirmation: str = Field(min_length=1, max_length=300)
     verification_query: str = Field(min_length=3, max_length=1000)
+
+
+class UrlEvidenceRequest(BaseModel):
+    model_config = {"extra": "forbid"}
+
+    url: str = Field(min_length=8, max_length=2000)
+    name: str | None = Field(default=None, min_length=1, max_length=255)
 
 
 def _item_payload(item: EvidenceItem) -> dict[str, object]:
@@ -62,13 +73,18 @@ async def ingest_evidence(
 ) -> JSONResponse:
     settings: Settings = request.app.state.settings
     public_demo = settings.env == "production" and settings.demo_mode
-    content = await file.read()
+    if public_demo:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Arbitrary uploads are disabled",
+        )
+    content = await file.read(LOCAL_LIMIT + 1)
     async with request.app.state.session_factory() as session:
         service = EvidenceService(
             session=session,
             memory=request.app.state.memory,
             dataset=settings.cognee_dataset,
-            public_demo=public_demo,
+            public_demo=False,
         )
         try:
             result = await service.ingest_upload(
@@ -101,6 +117,88 @@ async def ingest_evidence(
     return JSONResponse(
         status_code=status.HTTP_200_OK if result.reused else status.HTTP_201_CREATED,
         content=payload,
+    )
+
+
+@router.post("/url")
+async def ingest_evidence_url(
+    body: UrlEvidenceRequest,
+    request: Request,
+) -> JSONResponse:
+    from recallops.services.url_security import validate_safe_evidence_url
+
+    settings: Settings = request.app.state.settings
+    public_demo = settings.env == "production" and settings.demo_mode
+    if public_demo or not settings.allow_url_ingestion:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="URL ingestion is disabled",
+        )
+    try:
+        safe_url = await validate_safe_evidence_url(body.url)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Unsafe evidence URL",
+        ) from error
+
+    try:
+        async with httpx.AsyncClient(
+            follow_redirects=False,
+            timeout=httpx.Timeout(10.0),
+        ) as client:
+            async with client.stream("GET", safe_url) as response:
+                if response.is_redirect:
+                    raise ValueError("redirects are not accepted")
+                response.raise_for_status()
+                content = bytearray()
+                async for chunk in response.aiter_bytes():
+                    content.extend(chunk)
+                    if len(content) > 5 * 1024 * 1024:
+                        raise EvidenceTooLarge("evidence exceeds size limit")
+                content_type = response.headers.get(
+                    "content-type",
+                    "application/octet-stream",
+                ).split(";", 1)[0]
+    except EvidenceTooLarge as error:
+        raise HTTPException(
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+            detail="Evidence exceeds size limit",
+        ) from error
+    except (httpx.HTTPError, ValueError) as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Evidence URL could not be fetched safely",
+        ) from error
+
+    parsed = urlsplit(safe_url)
+    filename = body.name or PurePosixPath(unquote(parsed.path)).name or "evidence.txt"
+    async with request.app.state.session_factory() as session:
+        service = EvidenceService(
+            session=session,
+            memory=request.app.state.memory,
+            dataset=settings.cognee_dataset,
+            public_demo=False,
+        )
+        try:
+            result = await service.ingest_upload(
+                filename=filename,
+                content_type=content_type,
+                content=bytes(content),
+            )
+        except UnsupportedEvidenceType as error:
+            raise HTTPException(
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail="Unsupported evidence type",
+            ) from error
+        except MemoryIngestionFailed as error:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Memory provider unavailable",
+            ) from error
+    return JSONResponse(
+        status_code=status.HTTP_200_OK if result.reused else status.HTTP_201_CREATED,
+        content={**_item_payload(result.item), "reused": result.reused},
     )
 
 

@@ -8,10 +8,15 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from recallops.config import Settings
 from recallops.db import Base
 from recallops.domain import models as domain_models  # noqa: F401
 
 config = context.config
+config.set_main_option(
+    "sqlalchemy.url",
+    Settings().database_url.replace("%", "%%"),
+)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

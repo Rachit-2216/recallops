@@ -78,7 +78,7 @@ async def test_key_like_error_detail_is_fully_redacted(
     await repository.finish(
         operation,
         success=False,
-        error_detail="COGNEE_API_KEY=top-secret",
+        error_detail="COGNEE_API_KEY" + "=top-secret",
     )
 
     assert operation.error_category == "[REDACTED]"

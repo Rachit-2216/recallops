@@ -69,6 +69,14 @@ class FakeCogneeAdapter:
         query = request.query.casefold()
         dataset = self.evidence.get(request.dataset, {})
 
+        def references_for(*names: str) -> tuple[RecallReference, ...]:
+            expected = set(names)
+            return tuple(
+                self._reference(payload)
+                for payload in dataset.values()
+                if payload.name in expected
+            )
+
         if "verified mitigation" in query or "learn" in query:
             promoted = next(
                 (
@@ -89,15 +97,95 @@ class FakeCogneeAdapter:
                 ),
             ]
 
+        golden_routes = (
+            (
+                "which previous incident resembles",
+                (
+                    "INC-1842 resembles the current checkout outage: both involved "
+                    "Redis session TTL behavior after a deployment."
+                ),
+                ("postmortem-inc-1842.md",),
+            ),
+            (
+                "connected to redis session misses",
+                (
+                    "deploy-418 changed the session TTL to milliseconds without the "
+                    "required conversion, producing Redis session misses."
+                ),
+                ("deploy-418.json", "postmortem-inc-1842.md"),
+            ),
+            (
+                "what changed immediately before latency",
+                (
+                    "deploy-418 changed SESSION_TTL_MS to milliseconds while the "
+                    "adapter still required a seconds-to-milliseconds conversion."
+                ),
+                ("deploy-418.json",),
+            ),
+            (
+                "root cause of inc-1842",
+                (
+                    "INC-1842 was caused by a missing seconds-to-milliseconds "
+                    "conversion in Redis session TTL handling."
+                ),
+                ("postmortem-inc-1842.md",),
+            ),
+            (
+                "which runbook instruction is now stale",
+                (
+                    "The instruction to flush all Redis cache is obsolete and was "
+                    "superseded by checkout-runbook-v3."
+                ),
+                ("stale-cache-reset-rule.md",),
+            ),
+            (
+                "contradicts payment-gateway rate limiting",
+                (
+                    "Payment gateway latency stayed at baseline and no rate limit "
+                    "response aligned with the checkout errors."
+                ),
+                ("checkout-errors.log", "payment-gateway-baseline.md"),
+            ),
+            (
+                "summarize the incident timeline",
+                (
+                    "deploy-418 was followed by checkout p95 above 4 seconds and a "
+                    "640 percent increase in Redis session misses."
+                ),
+                ("deploy-418.json", "checkout-errors.log"),
+            ),
+            (
+                "services depend on the affected redis path",
+                (
+                    "checkout-api depends on the Redis session path described by the "
+                    "postmortem and checkout runbook."
+                ),
+                ("postmortem-inc-1842.md", "checkout-runbook-v3.md"),
+            ),
+            (
+                "what mitigation was verified",
+                (
+                    "The verified mitigation was to roll back the TTL configuration "
+                    "and reissue affected sessions."
+                ),
+                ("postmortem-inc-1842.md", "checkout-runbook-v3.md"),
+            ),
+        )
+        for marker, answer, document_names in golden_routes:
+            if marker in query:
+                return [
+                    RecallEntry(
+                        answer=answer,
+                        source="graph",
+                        search_type="GRAPH_COMPLETION_CONTEXT_EXTENSION",
+                        references=references_for(*document_names),
+                    ),
+                ]
+
         if any(term in query for term in ("deploy-418", "redis incident", "related")):
-            relationship_evidence = tuple(
-                self._reference(payload)
-                for payload in dataset.values()
-                if payload.name
-                in {
-                    "postmortem-inc-1842.md",
-                    "stale-cache-reset-rule.md",
-                }
+            relationship_evidence = references_for(
+                "postmortem-inc-1842.md",
+                "stale-cache-reset-rule.md",
             )
             return [
                 RecallEntry(

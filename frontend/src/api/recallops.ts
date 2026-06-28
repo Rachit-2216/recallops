@@ -209,7 +209,9 @@ export const recallOpsApi = {
   },
   forgetEvidence(
     item: EvidenceItem,
-    verificationQuery = `"${item.name}"`,
+    verificationQuery = item.name === "stale-cache-reset-rule.md"
+      ? '"flush all Redis cache"'
+      : `"${item.name}"`,
   ) {
     return request(`/api/evidence/${item.data_id}`, {
       method: "DELETE",

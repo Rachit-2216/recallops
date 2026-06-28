@@ -1,0 +1,23 @@
+services:
+  recallops:
+    build:
+      context: .
+    ports:
+      - "7860:7860"
+    environment:
+      APP_ENV: production
+      APP_DATABASE_URL: sqlite+aiosqlite:////data/recallops.db
+      APP_PUBLIC_ORIGIN: http://localhost:7860
+      APP_DEMO_MODE: "true"
+      APP_DEMO_BOOTSTRAP: "true"
+      APP_COGNEE_MODE: fake
+      PORT: "7860"
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - recallops-data:/data
+    restart: unless-stopped
+
+volumes:
+  recallops-data:

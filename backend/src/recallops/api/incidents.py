@@ -341,6 +341,8 @@ async def recall_incident(
                 detail="Protected Cognee reserve reached",
             ) from error
 
+        request.state.trace_id = result.trace_id
+        request.state.operation = "recall"
         return {
             "answer": result.answer,
             "verification": result.verification.value,
@@ -479,6 +481,8 @@ async def resolve_incident(
             ),
             "trace_ids": body.trace_ids,
         }
+        request.state.operation = "improve"
+        request.state.trace_id = body.trace_ids[0]
         if resolution.promotion_state == "promotion_failed":
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

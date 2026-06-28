@@ -33,7 +33,6 @@ dev = [
 [tool.pytest.ini_options]
 addopts = "-q --strict-markers -p no:cacheprovider"
 asyncio_mode = "auto"
-cache_dir = ".recallops_pytest_cache"
 pythonpath = ["backend/src", "."]
 testpaths = ["backend/tests"]
 markers = [
@@ -45,6 +44,7 @@ filterwarnings = [
 ]
 
 [tool.ruff]
+extend-exclude = ["pytest-cache-files-*"]
 line-length = 100
 src = ["backend/src"]
 target-version = "py313"

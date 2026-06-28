@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, RotateCcw, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -29,8 +29,11 @@ export function ResolutionPanel({
   const [mitigation, setMitigation] = useState("");
   const [verification, setVerification] = useState("");
   const [confirmed, setConfirmed] = useState(false);
+  const queryClient = useQueryClient();
   const promotion = useMutation({
     mutationFn: onResolve,
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["incident", incidentId] }),
   });
   const valid =
     rootCause.trim() &&

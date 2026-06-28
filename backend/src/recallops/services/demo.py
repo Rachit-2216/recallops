@@ -65,7 +65,7 @@ class DemoService:
         relative_path = f"demo/fixtures/{filename}"
         return str(uuid5(DEMO_NAMESPACE, relative_path))
 
-    async def seed(self) -> SeedResult:
+    async def seed(self, *, force: bool = False) -> SeedResult:
         seeded = 0
         reused = 0
         failed = 0
@@ -77,7 +77,8 @@ class DemoService:
             data_id = self.fixture_data_id(filename)
             evidence = await self._session.get(EvidenceItem, data_id)
             if (
-                evidence is not None
+                not force
+                and evidence is not None
                 and evidence.content_hash == content_hash
                 and evidence.status == "ready"
             ):

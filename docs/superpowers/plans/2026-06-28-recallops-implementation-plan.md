@@ -261,7 +261,7 @@ APP_COGNEE_DATASET=recallops_evidence_v1
 APP_COGNEE_TOKEN_SUPPLY=14000000
 APP_COGNEE_PROTECTED_RESERVE=6000000
 COGNEE_BASE_URL=
-COGNEE_API_KEY=
+COGNEE_API_KEY =
 RUN_COGNEE_INTEGRATION=0
 ```
 
@@ -1909,7 +1909,7 @@ Expected: all commands pass.
 - Create: `frontend/e2e/degraded-flow.spec.ts`
 - Modify: backend test/development dependency injection for fake mode
 
-- [ ] **Step 1: Configure deterministic browser testing**
+- [x] **Step 1: Configure deterministic browser testing**
 
 Playwright starts:
 
@@ -1921,7 +1921,7 @@ frontend: npm run dev -- --host 127.0.0.1 --port 5173
 Vite proxies `/api` to port 8000. Browser tests use fake Cognee and a temporary
 SQLite file. Enable trace on first retry and screenshot only on failure.
 
-- [ ] **Step 2: Write the complete judge-flow test**
+- [x] **Step 2: Write the complete judge-flow test**
 
 The test must:
 
@@ -1940,7 +1940,7 @@ The test must:
 
 Use role/label locators, not CSS implementation selectors.
 
-- [ ] **Step 3: Write the degraded-flow test**
+- [x] **Step 3: Write the degraded-flow test**
 
 Configure fake adapter recall failure, submit an observation, and assert:
 
@@ -1950,7 +1950,7 @@ Configure fake adapter recall failure, submit an observation, and assert:
 - retry control appears
 - health status reports memory degraded without secrets
 
-- [ ] **Step 4: Verify browser flow**
+- [x] **Step 4: Verify browser flow**
 
 Run:
 
@@ -1961,7 +1961,10 @@ npm --prefix frontend run e2e
 
 Expected: both tests pass in Chromium.
 
-- [ ] **Step 5: Commit**
+Status (2026-06-28): both Chromium tests pass against development servers and
+against the built production image.
+
+- [x] **Step 5: Commit**
 
 ```powershell
 git add backend frontend
@@ -1980,7 +1983,7 @@ git commit -m "test: prove the complete RecallOps judge journey"
 - Create: `backend/tests/unit/test_redaction.py`
 - Create: `backend/tests/api/test_security.py`
 
-- [ ] **Step 1: Write security tests**
+- [x] **Step 1: Write security tests**
 
 Assert:
 
@@ -1995,18 +1998,18 @@ Assert:
 - rate limit blocks excessive recall/mutation.
 - request logs redact `authorization`, `x-api-key`, and Cognee key patterns.
 
-- [ ] **Step 2: Implement structured safe logs**
+- [x] **Step 2: Implement structured safe logs**
 
 Log JSON with request ID, route template, method, status, duration, incident ID,
 trace ID, operation, and safe error category. Never log bodies, full query
 text, headers, secrets, or raw Cognee responses.
 
-- [ ] **Step 3: Implement repository preflight**
+- [x] **Step 3: Implement repository preflight**
 
 `scripts/preflight.py` must fail if:
 
 - tracked content contains a value matching configured Cognee key prefix or
-  `COGNEE_API_KEY=` with non-empty value
+  a non-empty `COGNEE_API_KEY` assignment
 - `.env` is tracked
 - live tests lack the opt-in gate
 - `forget(everything=True)` appears outside tests that assert prohibition
@@ -2014,17 +2017,19 @@ text, headers, secrets, or raw Cognee responses.
 - dataset constants differ from `recallops_evidence_v1`
 - landing route `/app` is absent
 
-- [ ] **Step 4: Verify and commit**
+- [x] **Step 4: Verify and commit**
 
 Run:
 
 ```powershell
 uv run pytest backend/tests/unit/test_redaction.py backend/tests/api/test_security.py -v
 uv run python scripts/preflight.py
-git grep -n "COGNEE_API_KEY=" -- ':!*.example'
+git grep -n "COGNEE_API_KEY[[:space:]]*=" -- ':!*.example'
 ```
 
 Expected: tests and preflight pass; Git grep has no output.
+
+Status (2026-06-28): tests, preflight, and secret grep pass.
 
 Commit:
 
@@ -2049,7 +2054,7 @@ git commit -m "security: harden public demo and secret handling"
 - Create: `docs/submission-checklist.md`
 - Create: `demo/demo-script.md`
 
-- [ ] **Step 1: Build the single production image**
+- [x] **Step 1: Build the single production image**
 
 Docker stages:
 
@@ -2064,7 +2069,7 @@ Docker stages:
 `compose.yaml` exposes `7860`, uses fake mode by default, mounts a named SQLite
 volume, and reads an optional untracked `.env`.
 
-- [ ] **Step 2: Verify local production deployment**
+- [x] **Step 2: Verify local production deployment**
 
 Run:
 
@@ -2077,7 +2082,10 @@ docker compose down
 
 Expected: health returns `status=ok`; logs contain no key or stack trace.
 
-- [ ] **Step 3: Add offline CI**
+Status (2026-06-28): the image builds, Compose starts successfully, health is
+`ok`, logs are clean, and both Chromium journeys pass against the image.
+
+- [x] **Step 3: Add offline CI**
 
 GitHub Actions must run:
 
@@ -2096,7 +2104,7 @@ uv run python scripts/preflight.py
 
 Do not configure Cognee credentials in pull-request CI.
 
-- [ ] **Step 4: Write the documentation**
+- [x] **Step 4: Write the documentation**
 
 README sections:
 
@@ -2119,7 +2127,7 @@ README sections:
 improve, and forget and state the limits of session deletion. `demo-script.md`
 uses the approved 90-second script exactly.
 
-- [ ] **Step 5: Prepare the Hugging Face Docker Space without paying**
+- [x] **Step 5: Prepare the Hugging Face Docker Space without paying**
 
 The Space README front matter:
 
@@ -2140,7 +2148,7 @@ Set only server-side Space secrets `COGNEE_BASE_URL`,
 `cpu-basic`. Do not enable persistent paid storage. The app must regenerate
 local demo state from fixtures after a cold start.
 
-- [ ] **Step 6: Verify and commit**
+- [x] **Step 6: Verify and commit**
 
 Run:
 
@@ -2154,6 +2162,8 @@ git diff --check
 ```
 
 Expected: every command passes.
+
+Status (2026-06-28): all offline checks and the production image build pass.
 
 Commit:
 
@@ -2173,7 +2183,7 @@ git commit -m "docs: package RecallOps for judging and deployment"
 - Create: `outputs/evaluation-report.json` only as an ignored/generated artifact
 - Modify: `docs/submission-checklist.md`
 
-- [ ] **Step 1: Implement the offline golden-question evaluator**
+- [x] **Step 1: Implement the offline golden-question evaluator**
 
 Read `demo/fixtures/expected-retrieval.json`, run each question through the fake
 adapter, and score:
@@ -2192,7 +2202,7 @@ forbidden claims: 10/10
 reference parsing: 10/10
 ```
 
-- [ ] **Step 2: Add the gated live judge-flow test**
+- [x] **Step 2: Add the gated live judge-flow test**
 
 The live test uses the actual demo dataset and:
 
@@ -2209,7 +2219,7 @@ The test writes a redacted result report containing timings, statuses, document
 names, and pass/fail assertions—never answer payloads that might include
 unexpected sensitive data.
 
-- [ ] **Step 3: Run offline evaluation**
+- [x] **Step 3: Run offline evaluation**
 
 Run:
 
@@ -2225,6 +2235,10 @@ Proceed only if remaining credits are comfortably above 8,000,000 tokens. If
 not, do not run the live proof; use the already-recorded adapter contract and
 preserve the 6,000,000 reserve.
 
+Status (2026-06-28): the configured base URL is structurally invalid and the
+credit dashboard cannot be confirmed from this environment. No live mutation
+was attempted.
+
 - [ ] **Step 5: Run the live proof once**
 
 Run:
@@ -2237,6 +2251,9 @@ Remove-Item Env:RUN_COGNEE_INTEGRATION
 
 Expected: one complete remember/recall/forget/improve/clean-recall lifecycle
 passes. Do not repeat solely to improve timing.
+
+Status (2026-06-28): intentionally skipped because the Step 4 gates are not
+satisfied, preserving the protected reserve.
 
 - [ ] **Step 6: Rehearse from the deployed URL**
 
@@ -2252,7 +2269,10 @@ Wake the free Space, then manually follow `demo/demo-script.md`. Confirm:
 - browser console has no uncaught error
 - no secret appears in network responses
 
-- [ ] **Step 7: Final verification**
+Status (2026-06-28): the Space-ready package is prepared, but no Hugging Face
+token or stored authentication is available, so no public Space was created.
+
+- [x] **Step 7: Final verification**
 
 Run:
 
@@ -2273,7 +2293,7 @@ git diff --check
 Expected: all automated checks pass; Git status contains only deliberately
 uncommitted generated screenshots/video artifacts, if any.
 
-- [ ] **Step 8: Final commit**
+- [x] **Step 8: Final commit**
 
 ```powershell
 git add scripts backend/tests/integration docs/submission-checklist.md

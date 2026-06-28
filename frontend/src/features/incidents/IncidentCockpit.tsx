@@ -30,6 +30,10 @@ export function IncidentCockpit() {
     queryFn: ({ signal }) => recallOpsApi.getIncident(incidentId, signal),
     enabled: Boolean(incidentId),
   });
+  const evidence = useQuery({
+    queryKey: ["evidence"],
+    queryFn: ({ signal }) => recallOpsApi.listEvidence(signal),
+  });
 
   const observe = useMutation({
     mutationFn: ({ content, observationId }: ObserveInput) =>
@@ -189,6 +193,7 @@ export function IncidentCockpit() {
           />
         ) : recall.data ? (
           <MemoryInspector
+            evidenceItems={evidence.data?.items}
             result={recall.data}
             sessionHypotheses={detail.memory_candidates}
           />

@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     database_url: str = "sqlite+aiosqlite:///./recallops.db"
     public_origin: str = "http://localhost:5173"
     demo_mode: bool = True
+    demo_bootstrap: bool = False
+    e2e_mode: bool = False
+    allow_url_ingestion: bool = False
     demo_admin_token: SecretStr = SecretStr("change-this-local-token")
     cognee_mode: Literal["fake", "live"] = "fake"
     cognee_dataset: str = "recallops_evidence_v1"

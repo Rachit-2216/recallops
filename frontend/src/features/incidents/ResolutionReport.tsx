@@ -17,10 +17,11 @@ export function ResolutionReport() {
   const detail = useQuery({
     queryKey: ["incident", incidentId],
     queryFn: ({ signal }) => recallOpsApi.getIncident(incidentId, signal),
+    refetchOnMount: "always",
   });
   const proof = useMutation({
     mutationFn: async () => {
-      const proofId = `PRF-${crypto.randomUUID().slice(0, 8)}`;
+      const proofId = `INC-${Date.now().toString().slice(-8)}`;
       await recallOpsApi.createIncident({
         id: proofId,
         title: `Clean-session proof for ${incidentId}`,
@@ -34,7 +35,7 @@ export function ResolutionReport() {
     },
   });
 
-  if (detail.isPending) {
+  if (detail.isPending || (detail.isFetching && !detail.data?.resolution)) {
     return (
       <section className="loading-panel" aria-live="polite">
         <h1>Loading resolution proof</h1>
