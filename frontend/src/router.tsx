@@ -2,6 +2,8 @@ import { Navigate, createBrowserRouter } from "react-router-dom";
 
 import { AppShell } from "./app/AppShell";
 import { RoutePlaceholder } from "./components/RoutePlaceholder";
+import { DemoHome } from "./features/demo/DemoHome";
+import { EvidenceLibrary } from "./features/evidence/EvidenceLibrary";
 
 export const router = createBrowserRouter([
   {
@@ -14,16 +16,11 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <RoutePlaceholder eyebrow="Demo 01" title="Incident queue" />,
+        element: <DemoHome />,
       },
       {
         path: "evidence",
-        element: (
-          <RoutePlaceholder
-            eyebrow="Permanent memory"
-            title="Evidence library"
-          />
-        ),
+        element: <EvidenceLibrary />,
       },
       {
         path: "incidents/:incidentId",

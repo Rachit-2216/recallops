@@ -1,6 +1,6 @@
 import clsx from "clsx";
 
-type StatusTone =
+export type StatusTone =
   | "neutral"
   | "session"
   | "graph"

@@ -49,7 +49,9 @@ def _item_payload(item: EvidenceItem) -> dict[str, object]:
         "source_uri": item.source_uri,
         "status": item.status,
         "content_hash": item.content_hash,
+        "source_date": item.source_date.isoformat() if item.source_date else None,
         "is_stale": item.is_stale,
+        "memory_layer": "permanent",
     }
 
 

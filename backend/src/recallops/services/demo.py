@@ -17,12 +17,12 @@ from recallops.memory.contract import CogneeMemoryPort, EvidencePayload
 
 DEMO_NAMESPACE = UUID("3d1d4c42-7e30-5e58-9e85-301ea55efcc1")
 EVIDENCE_FIXTURES = {
-    "postmortem-inc-1842.md": ("postmortem", False),
-    "checkout-runbook-v3.md": ("runbook", False),
-    "stale-cache-reset-rule.md": ("runbook", True),
-    "deploy-418.json": ("deploy", False),
-    "checkout-errors.log": ("log", False),
-    "payment-gateway-baseline.md": ("note", False),
+    "postmortem-inc-1842.md": ("postmortem", False, "2026-05-14T00:00:00Z"),
+    "checkout-runbook-v3.md": ("runbook", False, "2026-06-20T00:00:00Z"),
+    "stale-cache-reset-rule.md": ("runbook", True, "2025-01-10T00:00:00Z"),
+    "deploy-418.json": ("deploy", False, "2026-06-28T09:42:00Z"),
+    "checkout-errors.log": ("log", False, "2026-06-28T09:48:00Z"),
+    "payment-gateway-baseline.md": ("note", False, "2026-06-28T09:40:00Z"),
 }
 
 
@@ -70,7 +70,7 @@ class DemoService:
         reused = 0
         failed = 0
 
-        for filename, (kind, is_stale) in EVIDENCE_FIXTURES.items():
+        for filename, (kind, is_stale, source_date) in EVIDENCE_FIXTURES.items():
             fixture_path = self._fixtures_dir / filename
             content = fixture_path.read_bytes()
             content_hash = f"sha256:{hashlib.sha256(content).hexdigest()}"
@@ -92,6 +92,7 @@ class DemoService:
                     kind=kind,
                     status="queued",
                     content_hash=content_hash,
+                    source_date=_parse_timestamp(source_date),
                     is_stale=is_stale,
                 )
                 self._session.add(evidence)
@@ -100,6 +101,7 @@ class DemoService:
                 evidence.name = filename
                 evidence.kind = kind
                 evidence.content_hash = content_hash
+                evidence.source_date = _parse_timestamp(source_date)
                 evidence.is_stale = is_stale
                 evidence.status = "queued"
 

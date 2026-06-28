@@ -1576,14 +1576,14 @@ git commit -m "feat: establish RecallOps application shell"
 - Create: `frontend/src/features/evidence/EvidenceCard.tsx`
 - Create: `frontend/src/features/evidence/EvidenceLibrary.test.tsx`
 
-- [ ] **Step 1: Write the demo-start test**
+- [x] **Step 1: Write the demo-start test**
 
 Mock `/api/demo/reset`, then verify **Load Checkout Outage Demo** navigates to
 `/app/incidents/INC-2048`. If reset succeeds but seed is required, show one
 admin-token seed action in local mode; public mode shows contact/setup guidance
 instead of exposing a token field.
 
-- [ ] **Step 2: Implement the demo home**
+- [x] **Step 2: Implement the demo home**
 
 Show:
 
@@ -1597,19 +1597,19 @@ Show:
 
 Do not build hero marketing content here.
 
-- [ ] **Step 3: Write evidence-state tests**
+- [x] **Step 3: Write evidence-state tests**
 
 Render `queued`, `processing`, `ready`, `failed`, and `forgotten`. A forgotten
 item remains in audit history but is visually excluded from active evidence.
 Public demo shows no upload control.
 
-- [ ] **Step 4: Implement evidence library**
+- [x] **Step 4: Implement evidence library**
 
 Each card displays document name, kind, stable short ID, ingestion state,
 source date, and memory layer. The stale fixture has a visible **Stale** marker
 only because fixture metadata explicitly says it is obsolete.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 Run:
 
