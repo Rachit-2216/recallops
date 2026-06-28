@@ -179,7 +179,7 @@ Files stay focused:
 - Create: `frontend/vite.config.ts`
 - Create: `frontend/src/test/setup.ts`
 
-- [ ] **Step 1: Initialize Git if `git status` says this is not a repository**
+- [x] **Step 1: Initialize Git if `git status` says this is not a repository**
 
 Run:
 
@@ -191,7 +191,7 @@ git status --short
 
 Expected: `git status` succeeds and lists only planning files as untracked.
 
-- [ ] **Step 2: Create the Python project metadata**
+- [x] **Step 2: Create the Python project metadata**
 
 Create `pyproject.toml` with these dependency groups and commands:
 
@@ -246,7 +246,7 @@ packages = ["recallops"]
 mypy_path = "backend/src"
 ```
 
-- [ ] **Step 3: Create the safe environment template**
+- [x] **Step 3: Create the safe environment template**
 
 Create `.env.example`:
 
@@ -268,7 +268,7 @@ RUN_COGNEE_INTEGRATION=0
 Add `aiosqlite>=0.20,<1` to the main dependencies because the application uses
 the async SQLite driver.
 
-- [ ] **Step 4: Scaffold the frontend manifest**
+- [x] **Step 4: Scaffold the frontend manifest**
 
 Create `frontend/package.json`:
 
@@ -325,7 +325,7 @@ Create `frontend/package.json`:
 Create strict `frontend/tsconfig.json`, Vite React configuration, ESLint flat
 configuration, and Vitest setup with `@testing-library/jest-dom/vitest`.
 
-- [ ] **Step 5: Install and lock dependencies**
+- [x] **Step 5: Install and lock dependencies**
 
 Run:
 
@@ -337,7 +337,7 @@ npm --prefix frontend install
 Expected: `uv.lock` and `frontend/package-lock.json` exist; neither command
 reports a resolution error.
 
-- [ ] **Step 6: Verify clean empty-suite tooling**
+- [x] **Step 6: Verify clean empty-suite tooling**
 
 Run:
 
@@ -349,7 +349,7 @@ npm --prefix frontend run test
 
 Expected: Ruff passes; Pytest and Vitest report no collection/import failures.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```powershell
 git add .gitignore .env.example pyproject.toml uv.lock backend frontend/package.json frontend/package-lock.json frontend/tsconfig.json frontend/vite.config.ts
