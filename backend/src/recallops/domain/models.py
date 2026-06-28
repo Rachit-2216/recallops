@@ -322,6 +322,7 @@ class Resolution(Base):
         String(36),
         nullable=True,
     )
+    trace_ids_json: Mapped[str] = mapped_column(Text, default="[]")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=_utc_now,

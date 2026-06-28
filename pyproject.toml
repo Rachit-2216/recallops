@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "recallops"
 version = "0.1.0"
@@ -27,12 +31,17 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "-q --strict-markers"
+addopts = "-q --strict-markers -p no:cacheprovider"
 asyncio_mode = "auto"
-pythonpath = ["backend/src"]
+cache_dir = ".recallops_pytest_cache"
+pythonpath = ["backend/src", "."]
 testpaths = ["backend/tests"]
 markers = [
   "integration: requires explicitly enabled external services",
+]
+filterwarnings = [
+  'ignore:Using extra keyword arguments on `Field` is deprecated.*:pydantic.warnings.PydanticDeprecatedSince20:cognee\..*',
+  'ignore:`json_encoders` is deprecated.*:pydantic.warnings.PydanticDeprecatedSince20:pydantic\._internal\._generate_schema',
 ]
 
 [tool.ruff]
@@ -44,8 +53,18 @@ target-version = "py313"
 select = ["E", "F", "I", "B", "UP", "ASYNC", "S"]
 ignore = ["S101"]
 
+[tool.ruff.lint.per-file-ignores]
+"backend/tests/**/*.py" = ["S105", "S106"]
+
 [tool.mypy]
 python_version = "3.13"
 strict = true
 packages = ["recallops"]
 mypy_path = "backend/src"
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend/src/recallops"]
+
+[[tool.mypy.overrides]]
+module = ["cognee", "cognee.*"]
+ignore_missing_imports = true

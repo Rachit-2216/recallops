@@ -861,7 +861,7 @@ git commit -m "feat: protect Cognee credits and audit memory actions"
 - Create: `backend/tests/integration/test_cognee_live.py`
 - Create: `backend/tests/fixtures/cognee/live-contract.json`
 
-- [ ] **Step 1: Build a zero-mutation connectivity probe**
+- [x] **Step 1: Build a zero-mutation connectivity probe**
 
 The default probe must only call:
 
@@ -893,7 +893,11 @@ Remove-Item Env:RUN_COGNEE_INTEGRATION
 
 Expected: JSON containing `"connected": true`; no API key appears.
 
-- [ ] **Step 3: Write live adapter integration tests behind a hard gate**
+Status on 2026-06-28: the configured `COGNEE_BASE_URL` is not an absolute
+HTTP(S) URL, so the probe stopped before making a request. The SDK-created
+credential cache from the first failed attempt was cleared.
+
+- [x] **Step 3: Write live adapter integration tests behind a hard gate**
 
 At module level:
 
@@ -912,7 +916,7 @@ a random dataset per run. The test order is remember one tiny item, recall it,
 forget that exact item, and verify it is absent. The test must not run improve;
 the full improve proof happens once in Task 21.
 
-- [ ] **Step 4: Implement `CogneeCloudAdapter`**
+- [x] **Step 4: Implement `CogneeCloudAdapter`**
 
 Initialize once:
 
@@ -959,7 +963,7 @@ Record only field names and redacted response shapes in `live-contract.json`.
 If installed signatures differ from the official v1.0 operation names, keep the
 port unchanged and adapt here.
 
-- [ ] **Step 5: Verify offline behavior does not touch the network**
+- [x] **Step 5: Verify offline behavior does not touch the network**
 
 Run:
 
@@ -983,7 +987,10 @@ Remove-Item Env:RUN_COGNEE_INTEGRATION
 Expected: remember, recall, item-level forget, and absence verification pass;
 the test deletes only its own stable item.
 
-- [ ] **Step 7: Commit**
+Status on 2026-06-28: not run. Remaining credits could not be checked while
+the configured Cognee URL was invalid, so no live mutation was authorized.
+
+- [x] **Step 7: Commit**
 
 ```powershell
 git add scripts backend
@@ -1002,7 +1009,7 @@ git commit -m "feat: connect isolated Cognee Cloud adapter"
 - Create: `backend/tests/unit/test_demo_service.py`
 - Create: `backend/tests/api/test_demo_api.py`
 
-- [ ] **Step 1: Write the complete fixture narrative**
+- [x] **Step 1: Write the complete fixture narrative**
 
 Use stable IDs in `incident-2048-timeline.json`:
 
@@ -1049,7 +1056,7 @@ Fixture facts:
 - `expected-retrieval.json`: ten golden questions with expected documents,
   required concepts, and forbidden claims.
 
-- [ ] **Step 2: Write failing idempotency tests**
+- [x] **Step 2: Write failing idempotency tests**
 
 Assert two calls to `DemoService.seed()`:
 
@@ -1065,7 +1072,7 @@ DEMO_NAMESPACE = UUID("3d1d4c42-7e30-5e58-9e85-301ea55efcc1")
 data_id = str(uuid5(DEMO_NAMESPACE, fixture_relative_path))
 ```
 
-- [ ] **Step 3: Implement reset and seed**
+- [x] **Step 3: Implement reset and seed**
 
 `reset()` restores local demo incident, observations, candidates, and trace
 state, but never calls Cognee forget. `seed()` hashes fixture bytes, reuses
@@ -1083,14 +1090,14 @@ matching evidence rows, ingests only missing/changed items, and returns:
 
 The timeline metadata file is local-only and is not remembered as evidence.
 
-- [ ] **Step 4: Protect mutation endpoints**
+- [x] **Step 4: Protect mutation endpoints**
 
 `POST /api/demo/reset` is available in local/demo mode. `POST /api/demo/seed`
 requires header `X-Demo-Admin-Token` matching the configured token. Compare
 tokens with `secrets.compare_digest`. Return 401 without saying which part was
 wrong.
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run:
 
@@ -1100,7 +1107,7 @@ uv run pytest backend/tests/unit/test_demo_service.py backend/tests/api/test_dem
 
 Expected: all idempotency and auth tests pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add demo backend
@@ -1121,7 +1128,7 @@ git commit -m "feat: add deterministic checkout outage demo"
 - Create: `backend/tests/unit/test_forget_lifecycle.py`
 - Create: `backend/tests/api/test_evidence_api.py`
 
-- [ ] **Step 1: Write upload validation tests**
+- [x] **Step 1: Write upload validation tests**
 
 Cover:
 
@@ -1133,7 +1140,7 @@ Cover:
 - identical hash returns existing item without a memory call
 - filename is display-only and cannot control a filesystem path
 
-- [ ] **Step 2: Implement evidence ingestion**
+- [x] **Step 2: Implement evidence ingestion**
 
 Read uploads into bounded memory, sanitize the name with `Path(name).name`,
 validate content type and extension independently, calculate SHA-256, create a
@@ -1148,7 +1155,7 @@ queued -> processing -> ready
 Never store uploaded content under the repository root. Public demo accepts
 only seeded fixtures.
 
-- [ ] **Step 3: Write verified-forget tests**
+- [x] **Step 3: Write verified-forget tests**
 
 Required request:
 
@@ -1170,7 +1177,7 @@ Test success only when:
 Test that failure at steps 3 or 4 leaves the item visible and records a failed
 audit event.
 
-- [ ] **Step 4: Implement evidence routes**
+- [x] **Step 4: Implement evidence routes**
 
 Implement:
 
@@ -1183,7 +1190,7 @@ Implement:
 Use 404 for missing IDs, 409 for state conflicts, 413 for size, 415 for type,
 422 for confirmation mismatch, and 503 for memory-provider failures.
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run:
 
@@ -1193,7 +1200,7 @@ uv run pytest backend/tests/unit/test_evidence_service.py backend/tests/unit/tes
 
 Expected: all tests pass, including before/after recall proof.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add backend
@@ -1212,7 +1219,7 @@ git commit -m "feat: manage evidence and verify selective forgetting"
 - Create: `backend/tests/unit/test_incident_service.py`
 - Create: `backend/tests/api/test_incidents_api.py`
 
-- [ ] **Step 1: Write incident creation tests**
+- [x] **Step 1: Write incident creation tests**
 
 Assert:
 
@@ -1222,7 +1229,7 @@ Assert:
 - duplicate ID returns conflict
 - status starts `active`
 
-- [ ] **Step 2: Implement create, list, and detail**
+- [x] **Step 2: Implement create, list, and detail**
 
 Routes:
 
@@ -1233,14 +1240,14 @@ Routes:
 The detail response contains incident, ordered observations, latest recalls,
 candidate states, resolution state, and safe budget status.
 
-- [ ] **Step 3: Write observation failure/retry tests**
+- [x] **Step 3: Write observation failure/retry tests**
 
 When memory succeeds, persist `session_stored`. When memory is unavailable,
 persist observation locally as `pending` and return 202 with
 `memory_status="pending"`; a retry must reuse the same observation ID and avoid
 creating a duplicate.
 
-- [ ] **Step 4: Implement session remember**
+- [x] **Step 4: Implement session remember**
 
 `POST /api/incidents/{incident_id}/observe` validates 1-4000 characters and
 calls:
@@ -1255,7 +1262,7 @@ await memory.remember_observation(
 It must explicitly rely on the adapter's `self_improvement=False` policy. An
 observation is not permanent and the UI/API must not describe it as promoted.
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run:
 
@@ -1265,7 +1272,7 @@ uv run pytest backend/tests/unit/test_incident_service.py backend/tests/api/test
 
 Expected: all tests pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add backend
@@ -1284,7 +1291,7 @@ git commit -m "feat: add incidents and short-term session observations"
 - Create: `backend/tests/unit/test_recall_service.py`
 - Create: `backend/tests/api/test_recall_api.py`
 
-- [ ] **Step 1: Write verification policy tests**
+- [x] **Step 1: Write verification policy tests**
 
 Cases:
 
@@ -1296,7 +1303,7 @@ assert verification_for(entries_with_contradiction) == VerificationState.CONTRAD
 
 Also assert an unverified trace cannot be selected as resolution evidence.
 
-- [ ] **Step 2: Implement scoped recall**
+- [x] **Step 2: Implement scoped recall**
 
 `RecallService.ask()` must authorize the credit estimate, call the memory port
 with exact dataset and incident session, normalize entries, create one trace
@@ -1329,7 +1336,7 @@ UUID, persist references, and return:
 `why_recalled` is derived only from returned graph/reference facts or the
 deterministic fixture contract; do not invent graph paths.
 
-- [ ] **Step 3: Implement no-result and provider-error behavior**
+- [x] **Step 3: Implement no-result and provider-error behavior**
 
 - Empty recall -> 200, `answer=null`, `verification="unverified"`,
   `no_result=true`.
@@ -1338,7 +1345,7 @@ deterministic fixture contract; do not invent graph paths.
   `MEMORY_PROVIDER_UNAVAILABLE`.
 - Missing references -> answer shown but promotion disabled.
 
-- [ ] **Step 4: Add recall route and trace lookup**
+- [x] **Step 4: Add recall route and trace lookup**
 
 Implement:
 
@@ -1348,7 +1355,7 @@ Implement:
 Query length is 3-1000 characters. Public demo permits at most 20 recalls per
 browser demo session; return 429 with reset guidance after the limit.
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run:
 
@@ -1358,7 +1365,7 @@ uv run pytest backend/tests/unit/test_recall_service.py backend/tests/api/test_r
 
 Expected: relationship query returns referenced evidence; error tests pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add backend
@@ -1376,7 +1383,7 @@ git commit -m "feat: provide auditable graph-backed incident recall"
 - Create: `backend/tests/unit/test_resolution_lifecycle.py`
 - Create: `backend/tests/api/test_resolution_api.py`
 
-- [ ] **Step 1: Write feedback tests**
+- [x] **Step 1: Write feedback tests**
 
 `POST /api/incidents/{id}/feedback` accepts:
 
@@ -1392,7 +1399,7 @@ Score is `-1`, `0`, or `1`; explanation is 5-500 characters. A trace must
 belong to the incident. Store local feedback and write a session observation
 that Cognee can bridge during improve.
 
-- [ ] **Step 2: Write resolution gate tests**
+- [x] **Step 2: Write resolution gate tests**
 
 Reject unless all exist:
 
@@ -1405,7 +1412,7 @@ Reject unless all exist:
 On improve failure, resolution remains stored with
 `promotion_state="promotion_failed"`. On success it becomes `promoted`.
 
-- [ ] **Step 3: Implement controlled resolution**
+- [x] **Step 3: Implement controlled resolution**
 
 Request:
 
@@ -1432,7 +1439,7 @@ await memory.improve_session(
 Update incident to resolved only after the improve succeeds. If improve fails,
 keep it mitigated so the UI tells the truth.
 
-- [ ] **Step 4: Prove clean-session recall with the fake**
+- [x] **Step 4: Prove clean-session recall with the fake**
 
 After resolution, ask from `incident:INC-2099`:
 
@@ -1443,7 +1450,7 @@ What verified mitigation fixed INC-2048?
 Assert the response mentions TTL rollback and session reissue, comes from
 permanent graph memory, and has the promoted resolution reference.
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run:
 
@@ -1454,7 +1461,7 @@ uv run pytest backend/tests -m "not integration"
 
 Expected: all offline backend tests pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add backend
@@ -1476,7 +1483,7 @@ git commit -m "feat: improve memory from human-verified resolutions"
 - Create: `frontend/src/components/StatusBadge.tsx`
 - Create: `frontend/src/components/OperationBanner.tsx`
 
-- [ ] **Step 1: Write the failing shell test**
+- [x] **Step 1: Write the failing shell test**
 
 ```tsx
 it("reserves root and exposes the application navigation", async () => {
@@ -1501,7 +1508,7 @@ npm --prefix frontend run test -- AppShell.test.tsx
 
 Expected: FAIL because the shell does not exist.
 
-- [ ] **Step 2: Implement routing and provider setup**
+- [x] **Step 2: Implement routing and provider setup**
 
 Routes:
 
@@ -1517,13 +1524,13 @@ Routes:
 Wrap Router with `QueryClientProvider`. Configure TanStack Query with one retry
 for reads and zero automatic retries for mutations.
 
-- [ ] **Step 3: Implement a runtime-validated API client**
+- [x] **Step 3: Implement a runtime-validated API client**
 
 All responses must pass Zod schemas. `ApiError` contains HTTP status,
 application code, safe message, and request ID. `request()` sets JSON headers,
 includes credentials, accepts `AbortSignal`, and never logs response bodies.
 
-- [ ] **Step 4: Implement the application visual system**
+- [x] **Step 4: Implement the application visual system**
 
 This is the operational product UI, not the marketing landing page.
 
@@ -1539,7 +1546,7 @@ This is the operational product UI, not the marketing landing page.
 - Visible focus rings, keyboard navigation, reduced-motion support.
 - No gradients as decoration and no generic chat-bubble layout.
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run:
 
@@ -1550,7 +1557,7 @@ npm --prefix frontend run build
 
 Expected: tests pass and Vite production build succeeds.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add frontend

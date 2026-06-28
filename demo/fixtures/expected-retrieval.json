@@ -1,0 +1,62 @@
+[
+  {
+    "question": "Which previous incident resembles the current checkout outage?",
+    "expected_documents": ["postmortem-inc-1842.md"],
+    "required_concepts": ["INC-1842", "Redis", "TTL"],
+    "forbidden_claims": ["payment gateway caused"]
+  },
+  {
+    "question": "How is deploy-418 connected to Redis session misses?",
+    "expected_documents": ["deploy-418.json", "postmortem-inc-1842.md"],
+    "required_concepts": ["deploy-418", "TTL", "session misses"],
+    "forbidden_claims": ["global Redis outage"]
+  },
+  {
+    "question": "What changed immediately before latency increased?",
+    "expected_documents": ["deploy-418.json"],
+    "required_concepts": ["SESSION_TTL_MS", "milliseconds", "conversion"],
+    "forbidden_claims": ["payment gateway deploy"]
+  },
+  {
+    "question": "What was the root cause of INC-1842?",
+    "expected_documents": ["postmortem-inc-1842.md"],
+    "required_concepts": ["seconds-to-milliseconds", "Redis", "TTL"],
+    "forbidden_claims": ["cache capacity"]
+  },
+  {
+    "question": "Which runbook instruction is now stale?",
+    "expected_documents": ["stale-cache-reset-rule.md"],
+    "required_concepts": ["flush all Redis cache", "obsolete"],
+    "forbidden_claims": ["current recommended procedure"]
+  },
+  {
+    "question": "What evidence contradicts payment-gateway rate limiting?",
+    "expected_documents": ["checkout-errors.log", "payment-gateway-baseline.md"],
+    "required_concepts": ["baseline", "rate limit", "payment gateway"],
+    "forbidden_claims": ["payment gateway caused"]
+  },
+  {
+    "question": "Summarize the incident timeline.",
+    "expected_documents": ["deploy-418.json", "checkout-errors.log"],
+    "required_concepts": ["deploy-418", "4 seconds", "640 percent"],
+    "forbidden_claims": ["resolved before deployment"]
+  },
+  {
+    "question": "Which services depend on the affected Redis path?",
+    "expected_documents": ["postmortem-inc-1842.md", "checkout-runbook-v3.md"],
+    "required_concepts": ["checkout-api", "Redis", "session"],
+    "forbidden_claims": ["payment-gateway session store"]
+  },
+  {
+    "question": "What mitigation was verified?",
+    "expected_documents": ["postmortem-inc-1842.md", "checkout-runbook-v3.md"],
+    "required_concepts": ["roll back", "TTL", "reissue"],
+    "forbidden_claims": ["flush all Redis cache"]
+  },
+  {
+    "question": "What did RecallOps learn after INC-2048 was resolved?",
+    "expected_documents": ["verified-resolution-inc-2048.md"],
+    "required_concepts": ["TTL configuration", "reissued affected sessions"],
+    "forbidden_claims": ["learned before human confirmation"]
+  }
+]

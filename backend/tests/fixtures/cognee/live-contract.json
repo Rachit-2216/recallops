@@ -1,0 +1,62 @@
+{
+  "sdk_version": "1.2.2",
+  "operations": {
+    "remember": {
+      "request_fields": [
+        "data",
+        "dataset_name",
+        "session_id",
+        "run_in_background",
+        "self_improvement"
+      ],
+      "result_fields": [
+        "status",
+        "dataset_name",
+        "dataset_id",
+        "session_ids",
+        "pipeline_run_id",
+        "items"
+      ]
+    },
+    "recall": {
+      "request_fields": [
+        "query_text",
+        "datasets",
+        "session_id",
+        "verbose",
+        "include_references"
+      ],
+      "result_fields": [
+        "source",
+        "answer",
+        "search_type",
+        "references"
+      ]
+    },
+    "improve": {
+      "request_fields": [
+        "dataset_name",
+        "session_ids",
+        "run_in_background"
+      ]
+    },
+    "forget": {
+      "request_fields": [
+        "dataset",
+        "data_id"
+      ],
+      "result_fields": [
+        "status"
+      ]
+    }
+  },
+  "adapter_adaptations": [
+    "Use an in-memory CloudClient so environment credentials are never cached on disk.",
+    "List datasets through the remote HTTP route because the SDK namespace remains local-only.",
+    "Send session_ids directly to the improve route because CloudClient 1.2.2 omits that field."
+  ],
+  "live_probe": {
+    "status": "skipped",
+    "reason": "COGNEE_BASE_URL was configured but was not an absolute HTTP(S) URL."
+  }
+}

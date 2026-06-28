@@ -1,0 +1,23 @@
+{
+  "synthetic": true,
+  "deployment_id": "deploy-418",
+  "service": "checkout-api",
+  "deployed_at": "2026-06-28T08:01:00Z",
+  "commit": "synthetic-418",
+  "changes": [
+    {
+      "component": "checkout-session-adapter",
+      "before": {
+        "field": "SESSION_TTL_SECONDS",
+        "value": 1800,
+        "unit": "seconds"
+      },
+      "after": {
+        "field": "SESSION_TTL_MS",
+        "value": 1800000,
+        "unit": "milliseconds"
+      },
+      "adapter_conversion_added": false
+    }
+  ]
+}

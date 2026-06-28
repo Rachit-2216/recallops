@@ -1,0 +1,40 @@
+{
+  "synthetic": true,
+  "incident": {
+    "id": "INC-2048",
+    "title": "Checkout latency and session failures after deploy-418",
+    "severity": "SEV1",
+    "service": "checkout-api",
+    "status": "active",
+    "session_id": "incident:INC-2048",
+    "started_at": "2026-06-28T08:10:00Z"
+  },
+  "observations": [
+    {
+      "id": "ec91a2e3-22df-5bd3-a30a-650b455cd352",
+      "timestamp": "2026-06-28T08:10:00Z",
+      "source": "system",
+      "content": "Checkout p95 latency exceeded 4 seconds."
+    },
+    {
+      "id": "a429c4ce-45f7-5e8e-9f81-df8cfe814d10",
+      "timestamp": "2026-06-28T08:12:00Z",
+      "source": "system",
+      "content": "Redis session misses increased 640 percent."
+    },
+    {
+      "id": "2148c15c-53c5-50b0-9484-0e172d57fe6f",
+      "timestamp": "2026-06-28T08:14:00Z",
+      "source": "human",
+      "content": "Symptoms began within ten minutes of deploy-418."
+    }
+  ],
+  "memory_candidates": [
+    {
+      "id": "1723bf6b-6f83-5995-9445-f056d8b307d4",
+      "content": "Payment-gateway rate limiting caused the checkout slowdown.",
+      "state": "proposed",
+      "contradicted_by": "checkout-errors.log"
+    }
+  ]
+}

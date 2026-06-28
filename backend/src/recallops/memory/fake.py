@@ -117,7 +117,10 @@ class FakeCogneeAdapter:
             for payload in dataset.values()
             if any(
                 term in self._content_text(payload).casefold()
-                for term in query.split()
+                for raw_term in query.split()
+                if (
+                    term := raw_term.strip("\"'.,:;!?()[]{}")
+                )
                 if len(term) > 3
             )
         )
