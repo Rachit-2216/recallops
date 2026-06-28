@@ -1,0 +1,83 @@
+import json
+from pathlib import Path
+
+import pytest
+
+from recallops.memory.normalize import RecallContractError, normalize_recall
+
+FIXTURE = (
+    Path(__file__).parents[1]
+    / "fixtures"
+    / "cognee"
+    / "graph-recall.json"
+)
+
+
+def test_normalizes_recorded_verbose_graph_response() -> None:
+    raw = json.loads(FIXTURE.read_text(encoding="utf-8"))
+
+    entries = normalize_recall(raw)
+
+    assert entries[0].source == "graph"
+    assert entries[0].search_type == "GRAPH_COMPLETION_CONTEXT_EXTENSION"
+    assert entries[0].references[0].data_id == (
+        "11111111-1111-4111-8111-111111111111"
+    )
+    assert entries[0].references[0].chunk_id == (
+        "22222222-2222-4222-8222-222222222222"
+    )
+    assert entries[0].references[0].document_name == "postmortem-inc-1842.md"
+
+
+def test_normalizes_plain_string_response() -> None:
+    entries = normalize_recall("A prior Redis incident was found.")
+
+    assert entries[0].answer == "A prior Redis incident was found."
+    assert entries[0].source == "graph"
+    assert entries[0].search_type == "unknown"
+    assert entries[0].references == ()
+    assert entries[0].raw_kind == "string"
+
+
+def test_normalizes_a_list_with_multiple_supported_shapes() -> None:
+    entries = normalize_recall(
+        [
+            "First result",
+            {
+                "result": "Second result",
+                "source": "session",
+                "searchType": "CHUNKS",
+            },
+        ],
+    )
+
+    assert [entry.answer for entry in entries] == ["First result", "Second result"]
+    assert entries[1].source == "session"
+    assert entries[1].references == ()
+
+
+def test_normalizes_alternate_reference_key_names() -> None:
+    entries = normalize_recall(
+        {
+            "answer": "Referenced result",
+            "references": [
+                {
+                    "dataId": "data-1",
+                    "chunkId": "chunk-1",
+                    "documentName": "runbook.md",
+                    "text": "Rollback the TTL configuration.",
+                },
+            ],
+        },
+    )
+
+    reference = entries[0].references[0]
+    assert reference.data_id == "data-1"
+    assert reference.chunk_id == "chunk-1"
+    assert reference.document_name == "runbook.md"
+    assert reference.snippet == "Rollback the TTL configuration."
+
+
+def test_rejects_unsupported_recall_rows() -> None:
+    with pytest.raises(RecallContractError, match="unsupported recall row: int"):
+        normalize_recall(42)

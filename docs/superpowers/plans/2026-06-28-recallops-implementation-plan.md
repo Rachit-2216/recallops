@@ -632,7 +632,7 @@ git commit -m "feat: add incident memory domain and persistence"
 - Create: `backend/tests/unit/test_recall_normalize.py`
 - Create: `backend/tests/fixtures/cognee/graph-recall.json`
 
-- [ ] **Step 1: Write the adapter contract test**
+- [x] **Step 1: Write the adapter contract test**
 
 The same async test suite must run against any `CogneeMemoryPort`. Required
 behavior:
@@ -678,7 +678,7 @@ async def exercise_memory_contract(memory: CogneeMemoryPort) -> None:
 
 Run it against `FakeCogneeAdapter`; expect an import failure first.
 
-- [ ] **Step 2: Define SDK-independent dataclasses and protocol**
+- [x] **Step 2: Define SDK-independent dataclasses and protocol**
 
 `contract.py` must define concrete frozen dataclasses:
 
@@ -695,7 +695,7 @@ Run it against `FakeCogneeAdapter`; expect an import failure first.
 Define `CogneeMemoryPort` with the seven methods approved in the design. Use
 plain Python values only; no Cognee classes may appear in signatures.
 
-- [ ] **Step 3: Implement recall normalization from a recorded response**
+- [x] **Step 3: Implement recall normalization from a recorded response**
 
 Record a representative verbose graph response in
 `backend/tests/fixtures/cognee/graph-recall.json`, with `_source`, answer,
@@ -727,7 +727,7 @@ def normalize_recall(raw: object) -> list[RecallEntry]:
 Tests must cover a string, a dictionary, a list, absent references, malformed
 rows, and alternate reference key names.
 
-- [ ] **Step 4: Implement the deterministic fake adapter**
+- [x] **Step 4: Implement the deterministic fake adapter**
 
 The fake must:
 
@@ -741,7 +741,7 @@ The fake must:
 - Expose configurable failures for remember, recall, improve, and forget.
 - Count operations but never estimate real billing.
 
-- [ ] **Step 5: Run contract and normalization tests**
+- [x] **Step 5: Run contract and normalization tests**
 
 Run:
 
@@ -754,7 +754,7 @@ uv run mypy
 Expected: all tests pass and only `memory/cognee_cloud.py` remains allowed to
 import Cognee later.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add backend
