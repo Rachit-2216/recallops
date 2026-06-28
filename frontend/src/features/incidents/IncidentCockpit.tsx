@@ -10,6 +10,7 @@ import {
 } from "../../api/recallops";
 import { OperationBanner } from "../../components/OperationBanner";
 import { StatusBadge } from "../../components/StatusBadge";
+import { EmptyState } from "../../components/EmptyState";
 import { MemoryInspector } from "../memory/MemoryInspector";
 import { IncidentHeader } from "./IncidentHeader";
 import { ObservationComposer } from "./ObservationComposer";
@@ -173,7 +174,20 @@ export function IncidentCockpit() {
             title="Recall unavailable"
           />
         ) : null}
-        {recall.data ? (
+        {recall.data?.partial_memory ? (
+          <OperationBanner
+            detail="Some permanent evidence is still indexing. No unsupported answer will be shown."
+            state="warning"
+            title="Partial memory · indexing in progress"
+          />
+        ) : recall.data?.no_result ? (
+          <EmptyState
+            actionHref="/app/evidence"
+            actionLabel="Inspect evidence library"
+            detail="No permanent or session memory matched this question."
+            title="No matching memory"
+          />
+        ) : recall.data ? (
           <MemoryInspector
             result={recall.data}
             sessionHypotheses={detail.memory_candidates}

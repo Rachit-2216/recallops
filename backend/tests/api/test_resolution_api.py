@@ -149,6 +149,5 @@ def test_improve_failure_returns_retryable_stored_state(
     detail = client.get("/api/incidents/INC-2048")
 
     assert response.status_code == 503
-    assert response.json()["promotion_state"] == "promotion_failed"
-    assert response.json()["incident_status"] == "mitigated"
+    assert response.json()["error"]["code"] == "MEMORY_PROVIDER_UNAVAILABLE"
     assert detail.json()["resolution"]["promotion_state"] == "promotion_failed"

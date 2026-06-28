@@ -480,8 +480,8 @@ async def resolve_incident(
             "trace_ids": body.trace_ids,
         }
         if resolution.promotion_state == "promotion_failed":
-            return JSONResponse(
+            raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                content=payload,
+                detail="Memory provider unavailable",
             )
         return payload

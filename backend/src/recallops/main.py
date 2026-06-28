@@ -12,6 +12,7 @@ from recallops.api.health import router as health_router
 from recallops.api.incidents import router as incidents_router
 from recallops.config import Settings
 from recallops.db import create_session_factory
+from recallops.errors import install_error_handlers
 from recallops.memory.contract import CogneeMemoryPort
 from recallops.memory.fake import FakeCogneeAdapter
 from recallops.services.credit_guard import CreditGuard
@@ -30,6 +31,7 @@ def create_app(
 ) -> FastAPI:
     app_settings = settings or Settings()
     application = FastAPI(title="RecallOps", version="0.1.0")
+    install_error_handlers(application)
     application.state.settings = app_settings
     engine: AsyncEngine | None = None
     if session_factory is None:

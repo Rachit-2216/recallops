@@ -1,6 +1,7 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
 
 import { AppShell } from "./app/AppShell";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { DemoHome } from "./features/demo/DemoHome";
 import { EvidenceLibrary } from "./features/evidence/EvidenceLibrary";
 import { IncidentCockpit } from "./features/incidents/IncidentCockpit";
@@ -14,7 +15,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/app",
-    element: <AppShell />,
+    element: (
+      <ErrorBoundary>
+        <AppShell />
+      </ErrorBoundary>
+    ),
     children: [
       {
         index: true,

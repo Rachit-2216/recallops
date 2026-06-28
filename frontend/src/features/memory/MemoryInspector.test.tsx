@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import type { EvidenceItem, RecallResult } from "../../api/recallops";
 import { MemoryInspector } from "./MemoryInspector";
@@ -89,4 +89,18 @@ it("labels an answer without references unverified and offers no promotion", () 
   expect(
     screen.queryByRole("button", { name: /promote/i }),
   ).not.toBeInTheDocument();
+});
+
+it("returns keyboard focus to the forget trigger after the dialog closes", async () => {
+  render(<MemoryInspector evidenceItems={evidence} result={referenced} />);
+  fireEvent.click(screen.getByRole("tab", { name: "Lifecycle" }));
+  const trigger = screen.getByRole("button", { name: "Forget memory" });
+  trigger.focus();
+  fireEvent.click(trigger);
+
+  expect(screen.getByLabelText(/confirmation phrase/i)).toHaveFocus();
+  fireEvent.click(
+    screen.getByRole("button", { name: /close forget dialog/i }),
+  );
+  await waitFor(() => expect(trigger).toHaveFocus());
 });

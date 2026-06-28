@@ -2015,6 +2015,37 @@ a {
   color: var(--text);
 }
 
+.empty-state {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 16px;
+  border: 1px dashed var(--line-strong);
+  color: var(--muted);
+  background: var(--panel);
+}
+
+.empty-state > svg {
+  flex: 0 0 auto;
+  color: var(--amber);
+}
+
+.empty-state strong {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.empty-state p {
+  margin: 5px 0;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.empty-state a {
+  color: var(--cyan);
+  font-size: 10px;
+}
+
 @media (max-width: 760px) {
   .app-frame {
     grid-template-columns: 1fr;

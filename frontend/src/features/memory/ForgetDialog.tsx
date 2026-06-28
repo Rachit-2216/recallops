@@ -1,5 +1,5 @@
 import { AlertTriangle, Check, DatabaseZap, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type {
   EvidenceItem,
@@ -24,6 +24,16 @@ export function ForgetDialog({
   const [result, setResult] = useState<ForgetResult | null>(null);
   const [error, setError] = useState("");
   const expected = `FORGET ${item.name}`;
+
+  useEffect(() => {
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape" && phase !== "deleting") {
+        onClose();
+      }
+    }
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [onClose, phase]);
 
   async function submit() {
     if (confirmation !== expected || phase === "deleting") return;
@@ -138,6 +148,7 @@ export function ForgetDialog({
               <code>{expected}</code>
             </label>
             <input
+              autoFocus
               autoComplete="off"
               id="forget-confirmation"
               onChange={(event) => setConfirmation(event.target.value)}

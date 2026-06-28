@@ -1849,7 +1849,7 @@ Expected: tests and build pass.
 - Create: `backend/src/recallops/errors.py`
 - Create: `backend/tests/api/test_error_contract.py`
 
-- [ ] **Step 1: Lock the backend error envelope**
+- [x] **Step 1: Lock the backend error envelope**
 
 All non-2xx API responses:
 
@@ -1867,7 +1867,7 @@ All non-2xx API responses:
 Write tests for 401, 404, 409, 413, 415, 422, 429, and 503. Assert stack
 traces, URLs, headers, and keys never appear.
 
-- [ ] **Step 2: Implement frontend state tests**
+- [x] **Step 2: Implement frontend state tests**
 
 Cover:
 
@@ -1878,13 +1878,13 @@ Cover:
 - improve failure -> retry without false success
 - forget failure -> evidence remains visible
 
-- [ ] **Step 3: Run automated accessibility checks in component tests**
+- [x] **Step 3: Run automated accessibility checks in component tests**
 
 Add `vitest-axe` and assert no violations on AppShell, IncidentCockpit,
 MemoryInspector, ForgetDialog, and ResolutionPanel. Test keyboard focus return
 after dialogs and `aria-live` for operation completion.
 
-- [ ] **Step 4: Verify and commit**
+- [x] **Step 4: Verify and commit**
 
 Run:
 

@@ -6,7 +6,7 @@ import {
   ShieldCheck,
   XCircle,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import {
   recallOpsApi,
@@ -42,6 +42,7 @@ export function MemoryInspector({
     result.references[0]?.data_id,
   );
   const [forgetItem, setForgetItem] = useState<EvidenceItem | null>(null);
+  const forgetTriggerRef = useRef<HTMLButtonElement>(null);
   const selectedReference =
     result.references.find((item) => item.data_id === selectedDataId) ??
     result.references[0];
@@ -160,6 +161,7 @@ export function MemoryInspector({
                   <button
                     className="danger-link"
                     onClick={() => setForgetItem(selectedEvidence)}
+                    ref={forgetTriggerRef}
                     type="button"
                   >
                     Forget memory
@@ -193,7 +195,10 @@ export function MemoryInspector({
       {forgetItem ? (
         <ForgetDialog
           item={forgetItem}
-          onClose={() => setForgetItem(null)}
+          onClose={() => {
+            setForgetItem(null);
+            queueMicrotask(() => forgetTriggerRef.current?.focus());
+          }}
           onForget={recallOpsApi.forgetEvidence}
         />
       ) : null}
