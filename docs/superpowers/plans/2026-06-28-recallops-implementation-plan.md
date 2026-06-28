@@ -772,7 +772,7 @@ git commit -m "feat: define portable Cognee memory contract"
 - Create: `backend/tests/unit/test_credit_guard.py`
 - Create: `backend/tests/unit/test_audit_log.py`
 
-- [ ] **Step 1: Write failing budget policy tests**
+- [x] **Step 1: Write failing budget policy tests**
 
 Create exact cases:
 
@@ -795,7 +795,7 @@ def test_final_demo_operation_can_use_rehearsal_allowance_not_reserve() -> None:
 The second assertion means an essential action is allowed only while the result
 remains above the reserve.
 
-- [ ] **Step 2: Implement fail-closed authorization**
+- [x] **Step 2: Implement fail-closed authorization**
 
 `authorize()` returns a decision with `allowed`, `reason`,
 `remaining_before`, and `remaining_after`. Reject negative estimates, unknown
@@ -814,7 +814,7 @@ DEFAULT_ESTIMATES = {
 These are conservative internal accounting values, not claims about Cognee
 billing.
 
-- [ ] **Step 3: Write and implement audit repository tests**
+- [x] **Step 3: Write and implement audit repository tests**
 
 Every memory operation record must include:
 
@@ -833,7 +833,7 @@ Every memory operation record must include:
 Test that a key-like string passed as error detail is redacted to
 `[REDACTED]`. Never persist raw request headers or response payloads.
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run:
 
@@ -843,7 +843,7 @@ uv run pytest backend/tests/unit/test_credit_guard.py backend/tests/unit/test_au
 
 Expected: all tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add backend
