@@ -25,6 +25,83 @@ export const evidenceItemSchema = z.object({
 
 export type EvidenceItem = z.infer<typeof evidenceItemSchema>;
 
+export const observationSchema = z.object({
+  id: z.string(),
+  incident_id: z.string(),
+  timestamp: z.string(),
+  source: z.string(),
+  content: z.string(),
+  memory_status: z.enum(["pending", "session_stored"]),
+  memory_layer: z.literal("session"),
+  retry_count: z.number(),
+});
+
+const incidentSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  severity: z.string(),
+  service: z.string(),
+  status: z.string(),
+  session_id: z.string(),
+  started_at: z.string(),
+  resolved_at: z.string().nullable(),
+});
+
+export const recallReferenceSchema = z.object({
+  data_id: z.string(),
+  chunk_id: z.string(),
+  document_name: z.string(),
+  snippet: z.string(),
+});
+
+export const recallResultSchema = z.object({
+  answer: z.string().nullable(),
+  verification: z.enum(["referenced", "unverified"]),
+  source: z.string().optional(),
+  search_type: z.string().optional(),
+  references: z.array(recallReferenceSchema).optional().default([]),
+  trace_id: z.string().optional(),
+  why_recalled: z.array(z.string()).optional().default([]),
+  no_result: z.boolean(),
+  partial_memory: z.boolean(),
+});
+
+const incidentDetailSchema = z.object({
+  incident: incidentSchema,
+  observations: z.array(observationSchema),
+  recalls: z.array(
+    z.object({
+      trace_id: z.string(),
+      answer: z.string().nullable(),
+      verification: z.string(),
+    }),
+  ),
+  memory_candidates: z.array(
+    z.object({
+      id: z.string(),
+      content: z.string(),
+      state: z.string(),
+      data_id: z.string().nullable(),
+    }),
+  ),
+  resolution: z
+    .object({
+      root_cause: z.string(),
+      mitigation: z.string(),
+      verification: z.string(),
+      promotion_state: z.string(),
+    })
+    .nullable(),
+  budget: z.object({
+    estimated_remaining: z.number(),
+    protected_reserve: z.number(),
+  }),
+});
+
+export type IncidentDetail = z.infer<typeof incidentDetailSchema>;
+export type Observation = z.infer<typeof observationSchema>;
+export type RecallResult = z.infer<typeof recallResultSchema>;
+
 const evidenceListSchema = z.object({
   items: z.array(evidenceItemSchema),
 });
@@ -63,5 +140,39 @@ export const recallOpsApi = {
       headers: { "X-Demo-Admin-Token": adminToken },
       schema: demoSeedSchema,
     });
+  },
+  getIncident(incidentId: string, signal?: AbortSignal) {
+    return request(`/api/incidents/${incidentId}`, {
+      schema: incidentDetailSchema,
+      signal,
+    });
+  },
+  observeIncident(
+    incidentId: string,
+    content: string,
+    observationId: string,
+  ) {
+    return request(`/api/incidents/${incidentId}/observe`, {
+      method: "POST",
+      body: { content, observation_id: observationId },
+      schema: observationSchema,
+    });
+  },
+  async recallIncident(
+    incidentId: string,
+    query: string,
+    signal?: AbortSignal,
+  ): Promise<RecallResult> {
+    const result = await request(`/api/incidents/${incidentId}/recall`, {
+      method: "POST",
+      body: { query, include_trace: true },
+      schema: recallResultSchema,
+      signal,
+    });
+    return {
+      ...result,
+      references: result.references ?? [],
+      why_recalled: result.why_recalled ?? [],
+    };
   },
 };

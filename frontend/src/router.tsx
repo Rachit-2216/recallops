@@ -4,6 +4,7 @@ import { AppShell } from "./app/AppShell";
 import { RoutePlaceholder } from "./components/RoutePlaceholder";
 import { DemoHome } from "./features/demo/DemoHome";
 import { EvidenceLibrary } from "./features/evidence/EvidenceLibrary";
+import { IncidentCockpit } from "./features/incidents/IncidentCockpit";
 
 export const router = createBrowserRouter([
   {
@@ -24,9 +25,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "incidents/:incidentId",
-        element: (
-          <RoutePlaceholder eyebrow="Live session" title="Incident cockpit" />
-        ),
+        element: <IncidentCockpit />,
       },
       {
         path: "memory",

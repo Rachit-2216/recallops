@@ -1635,7 +1635,7 @@ Expected: tests and build pass before commit.
 - Create: `frontend/src/features/incidents/RecallComposer.tsx`
 - Create: `frontend/src/features/incidents/IncidentCockpit.test.tsx`
 
-- [ ] **Step 1: Write the cockpit rendering test**
+- [x] **Step 1: Write the cockpit rendering test**
 
 Given seeded API data, assert the screen shows:
 
@@ -1649,7 +1649,7 @@ Given seeded API data, assert the screen shows:
 - recall question input
 - Memory Inspector region
 
-- [ ] **Step 2: Implement the three-column cockpit**
+- [x] **Step 2: Implement the three-column cockpit**
 
 Desktop:
 
@@ -1661,13 +1661,13 @@ Below 1100px, inspector becomes a right drawer. Below 760px, navigation
 collapses and content remains fully operable. Keep the judge flow above the
 fold at 1440x900.
 
-- [ ] **Step 3: Implement optimistic observation behavior**
+- [x] **Step 3: Implement optimistic observation behavior**
 
 Add observation immediately as `pending`, replace with `session_stored` on
 success, keep pending with a retry button on 202/degraded response, and never
 label it permanent.
 
-- [ ] **Step 4: Implement recall input**
+- [x] **Step 4: Implement recall input**
 
 Pre-fill the judge query when `?demo=checkout`:
 
@@ -1678,7 +1678,7 @@ How is deploy-418 related to the previous Redis incident?
 Submit on button or Ctrl/Cmd+Enter. Display an in-progress operation row instead
 of an indefinite spinner. Cancel stale requests on route change.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 Run:
 
