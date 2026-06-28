@@ -368,7 +368,7 @@ git commit -m "chore: scaffold RecallOps workspace"
 - Create: `backend/tests/unit/test_config.py`
 - Create: `backend/tests/api/test_health.py`
 
-- [ ] **Step 1: Write failing configuration tests**
+- [x] **Step 1: Write failing configuration tests**
 
 Create `backend/tests/unit/test_config.py`:
 
@@ -389,7 +389,7 @@ def test_settings_repr_does_not_expose_api_key() -> None:
     assert "super-secret" not in repr(settings)
 ```
 
-- [ ] **Step 2: Run the tests and verify the import failure**
+- [x] **Step 2: Run the tests and verify the import failure**
 
 Run:
 
@@ -399,7 +399,7 @@ uv run pytest backend/tests/unit/test_config.py -v
 
 Expected: FAIL because `recallops.config` does not exist.
 
-- [ ] **Step 3: Implement typed settings**
+- [x] **Step 3: Implement typed settings**
 
 Implement `Settings` with `env_prefix="APP_"`, `SecretStr` for the key, literal
 `cognee_mode` values `fake|live`, `database_url`, origin, demo token, dataset,
@@ -424,7 +424,7 @@ cognee_base_url: str | None = Field(default=None, validation_alias="COGNEE_BASE_
 cognee_api_key: SecretStr | None = Field(default=None, validation_alias="COGNEE_API_KEY")
 ```
 
-- [ ] **Step 4: Write the failing health API test**
+- [x] **Step 4: Write the failing health API test**
 
 Create `backend/tests/api/test_health.py`:
 
@@ -453,7 +453,7 @@ uv run pytest backend/tests/api/test_health.py -v
 
 Expected: FAIL because the app factory does not exist.
 
-- [ ] **Step 5: Implement the app factory and health route**
+- [x] **Step 5: Implement the app factory and health route**
 
 `create_app(settings: Settings | None = None)` must store settings in
 `app.state.settings`, add a UUID request ID to response header `X-Request-ID`,
@@ -471,7 +471,7 @@ mount an `/api/health` router, and return:
 
 Do not include configured URLs, tokens, or credential presence flags.
 
-- [ ] **Step 6: Run quality checks**
+- [x] **Step 6: Run quality checks**
 
 Run:
 
@@ -483,7 +483,7 @@ uv run mypy
 
 Expected: all commands pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```powershell
 git add backend

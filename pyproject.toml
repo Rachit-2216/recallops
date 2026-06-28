@@ -18,6 +18,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+  "httpx2>=2,<3",
   "mypy>=1.14,<2",
   "pytest>=8.3,<9",
   "pytest-asyncio>=0.25,<1",
@@ -36,6 +37,7 @@ markers = [
 
 [tool.ruff]
 line-length = 100
+src = ["backend/src"]
 target-version = "py313"
 
 [tool.ruff.lint]
