@@ -168,6 +168,7 @@ For a free Hugging Face Docker Space:
 
 The verified public deployment is:
 
+- Source: <https://github.com/Rachit-2216/recallops>
 - App: <https://rachitr-recallops.hf.space>
 - Space repository: <https://huggingface.co/spaces/rachitr/recallops>
 - Runtime: free `cpu-basic`, Docker SDK, port `7860`

@@ -45,14 +45,15 @@
 
 ## Submission assets
 
-- [ ] Five application screenshots contain no secrets. Four verified captures
-  are in ignored `output/playwright/`; the clean-session proof was verified in
-  the browser, but its fifth screenshot still needs to be saved.
+- [x] Five application screenshots contain no secrets. The verified captures
+  are in ignored `output/playwright/`.
 - [ ] 90-second video follows `demo/demo-script.md`.
 - [x] Public URL works in a signed-out Chromium browser:
   <https://rachitr-recallops.hf.space>.
-- [x] Repository URL and deployed commit are recorded:
+- [x] Repository URLs and deployed commits are recorded:
+  <https://github.com/Rachit-2216/recallops>,
+  source commit `10efb76`; and
   <https://huggingface.co/spaces/rachitr/recallops>,
-  `da29b9dc7682272d9481d0655530f2bb2ed94587`.
+  Space commit `be78620e1cc04a27defd558a8dfa891fbb8ad8e7`.
 - [x] Synthetic-data and AI-assistance disclosures are visible.
 - [x] Known limitations match actual behavior.
