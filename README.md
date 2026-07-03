@@ -179,24 +179,6 @@ deterministic. Switch to live mode only after the configured Cognee Cloud
 endpoint returns reference-bearing graph recall results for the gated adapter
 contract.
 
-## Screenshots
-
-The submission captures should show:
-
-- demo home and protected reserve;
-- `INC-2048` cockpit with referenced recall;
-- Memory Inspector provenance/path tabs;
-- verified forget before/after proof;
-- promoted resolution and clean-session proof.
-
-No credential-bearing browser or dashboard content belongs in screenshots.
-
-## 90-second video
-
-Record the deployed URL using [demo/demo-script.md](demo/demo-script.md). The
-submission checklist intentionally requires the final video URL to be added only
-after the deployed rehearsal passes.
-
 ## Known limitations
 
 - The public demo uses one synthetic incident narrative.
