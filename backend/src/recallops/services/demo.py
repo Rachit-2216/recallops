@@ -17,12 +17,42 @@ from recallops.memory.contract import CogneeMemoryPort, EvidencePayload
 
 DEMO_NAMESPACE = UUID("3d1d4c42-7e30-5e58-9e85-301ea55efcc1")
 EVIDENCE_FIXTURES = {
-    "postmortem-inc-1842.md": ("postmortem", False, "2026-05-14T00:00:00Z"),
-    "checkout-runbook-v3.md": ("runbook", False, "2026-06-20T00:00:00Z"),
-    "stale-cache-reset-rule.md": ("runbook", True, "2025-01-10T00:00:00Z"),
-    "deploy-418.json": ("deploy", False, "2026-06-28T09:42:00Z"),
-    "checkout-errors.log": ("log", False, "2026-06-28T09:48:00Z"),
-    "payment-gateway-baseline.md": ("note", False, "2026-06-28T09:40:00Z"),
+    "cloudflare-december-5-postmortem.md": (
+        "postmortem",
+        False,
+        "2025-12-05T00:00:00Z",
+        "https://blog.cloudflare.com/5-december-2025-outage/",
+    ),
+    "cloudflare-november-18-postmortem.md": (
+        "postmortem",
+        False,
+        "2025-11-18T00:00:00Z",
+        "https://blog.cloudflare.com/18-november-2025-outage/",
+    ),
+    "code-orange-fail-small-guidance.md": (
+        "runbook",
+        False,
+        "2025-12-19T00:00:00Z",
+        "https://blog.cloudflare.com/fail-small-resilience-plan-uk-ua/",
+    ),
+    "unsafe-global-killswitch-assumption.md": (
+        "runbook",
+        True,
+        "2025-12-05T00:00:00Z",
+        "https://blog.cloudflare.com/5-december-2025-outage/",
+    ),
+    "cloudflare-december-5-change.json": (
+        "deploy",
+        False,
+        "2025-12-05T08:47:00Z",
+        "https://blog.cloudflare.com/5-december-2025-outage/",
+    ),
+    "cloudflare-december-5-derived-events.log": (
+        "log",
+        False,
+        "2025-12-05T08:47:00Z",
+        "https://blog.cloudflare.com/5-december-2025-outage/",
+    ),
 }
 
 
@@ -70,7 +100,12 @@ class DemoService:
         reused = 0
         failed = 0
 
-        for filename, (kind, is_stale, source_date) in EVIDENCE_FIXTURES.items():
+        for filename, (
+            kind,
+            is_stale,
+            source_date,
+            source_uri,
+        ) in EVIDENCE_FIXTURES.items():
             fixture_path = self._fixtures_dir / filename
             content = fixture_path.read_bytes()
             content_hash = f"sha256:{hashlib.sha256(content).hexdigest()}"
@@ -91,6 +126,7 @@ class DemoService:
                     dataset=self._dataset,
                     name=filename,
                     kind=kind,
+                    source_uri=source_uri,
                     status="queued",
                     content_hash=content_hash,
                     source_date=_parse_timestamp(source_date),
@@ -101,6 +137,7 @@ class DemoService:
                 evidence.dataset = self._dataset
                 evidence.name = filename
                 evidence.kind = kind
+                evidence.source_uri = source_uri
                 evidence.content_hash = content_hash
                 evidence.source_date = _parse_timestamp(source_date)
                 evidence.is_stale = is_stale
@@ -140,7 +177,7 @@ class DemoService:
 
     async def reset(self) -> ResetResult:
         timeline = json.loads(
-            (self._fixtures_dir / "incident-2048-timeline.json").read_text(
+            (self._fixtures_dir / "cloudflare-december-5-timeline.json").read_text(
                 encoding="utf-8",
             ),
         )

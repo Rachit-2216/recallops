@@ -14,7 +14,8 @@ from recallops.memory.fake import FakeCogneeAdapter
 
 FIXTURES = Path(__file__).parents[3] / "demo" / "fixtures"
 ADMIN_HEADERS = {"X-Demo-Admin-Token": "test-demo-token"}
-QUERY = "How is deploy-418 related to the previous Redis incident?"
+INCIDENT_ID = "CF-OUTAGE-2025-12-05"
+QUERY = "How is the December 5 outage related to the November 18 outage?"
 
 
 @pytest.fixture
@@ -42,10 +43,13 @@ def client_and_memory() -> Iterator[tuple[TestClient, FakeCogneeAdapter]]:
 
     with TestClient(app) as client:
         assert client.post("/api/demo/reset").status_code == 200
-        assert client.post(
-            "/api/demo/seed",
-            headers=ADMIN_HEADERS,
-        ).status_code == 200
+        assert (
+            client.post(
+                "/api/demo/seed",
+                headers=ADMIN_HEADERS,
+            ).status_code
+            == 200
+        )
         yield client, memory
     asyncio.run(engine.dispose())
 
@@ -56,24 +60,24 @@ def test_relationship_recall_returns_persisted_references(
     client, _ = client_and_memory
 
     response = client.post(
-        "/api/incidents/INC-2048/recall",
+        f"/api/incidents/{INCIDENT_ID}/recall",
         json={"query": QUERY, "include_trace": True},
     )
 
     assert response.status_code == 200
     body = response.json()
-    assert "INC-1842" in body["answer"]
+    assert "November 18" in body["answer"]
     assert body["verification"] == "referenced"
     assert body["source"] == "graph"
     assert body["search_type"] == "GRAPH_COMPLETION_CONTEXT_EXTENSION"
     assert len(body["why_recalled"]) == 4
     assert any(
-        reference["document_name"] == "postmortem-inc-1842.md"
+        reference["document_name"] == "cloudflare-november-18-postmortem.md"
         for reference in body["references"]
     )
 
     trace = client.get(
-        f"/api/incidents/INC-2048/recalls/{body['trace_id']}",
+        f"/api/incidents/{INCIDENT_ID}/recalls/{body['trace_id']}",
     )
     assert trace.status_code == 200
     assert trace.json()["trace_id"] == body["trace_id"]
@@ -86,8 +90,8 @@ def test_no_result_is_explicit_and_unverified(
     client, _ = client_and_memory
 
     response = client.post(
-        "/api/incidents/INC-2048/recall",
-        json={"query": "Is there a quantum networking failure?"},
+        f"/api/incidents/{INCIDENT_ID}/recall",
+        json={"query": "xylophonic quasar topology"},
     )
 
     assert response.status_code == 200
@@ -103,7 +107,7 @@ def test_provider_failure_returns_safe_503(
     memory.fail_operations.add("recall")
 
     response = client.post(
-        "/api/incidents/INC-2048/recall",
+        f"/api/incidents/{INCIDENT_ID}/recall",
         json={"query": QUERY},
     )
 
@@ -122,7 +126,7 @@ def test_indexing_dataset_returns_partial_memory_202(
 
     memory.dataset_status = indexing  # type: ignore[method-assign]
     response = client.post(
-        "/api/incidents/INC-2048/recall",
+        f"/api/incidents/{INCIDENT_ID}/recall",
         json={"query": QUERY},
     )
 

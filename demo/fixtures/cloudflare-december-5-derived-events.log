@@ -1,0 +1,5 @@
+2025-12-05T08:47:00Z source=official-postmortem event=config_propagation service=cloudflare-fl1 summary="Global WAF configuration change deployed; reconstructed event, not a raw log"
+2025-12-05T08:48:00Z source=official-postmortem event=full_impact impact_http_traffic_percent=28 summary="Affected configurations returned HTTP 500 errors; reconstructed event"
+2025-12-05T08:50:00Z source=official-postmortem event=incident_declared signal=automated_alerts summary="Incident declared after automated alerts; reconstructed event"
+2025-12-05T09:11:00Z source=official-postmortem event=rollback_started summary="Configuration change reverted and propagation began; reconstructed event"
+2025-12-05T09:12:00Z source=official-postmortem event=traffic_restored summary="Revert fully propagated and all traffic restored; reconstructed event"

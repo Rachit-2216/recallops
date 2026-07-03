@@ -133,7 +133,7 @@ const demoResetSchema = z.object({
   incident_id: z.string(),
   observation_count: z.number(),
   candidate_count: z.number(),
-  synthetic: z.literal(true),
+  case_study: z.literal("public_postmortem"),
 });
 
 const demoSeedSchema = z.object({
@@ -209,8 +209,8 @@ export const recallOpsApi = {
   },
   forgetEvidence(
     item: EvidenceItem,
-    verificationQuery = item.name === "stale-cache-reset-rule.md"
-      ? '"flush all Redis cache"'
+    verificationQuery = item.name === "unsafe-global-killswitch-assumption.md"
+      ? '"Any WAF rule can be disabled through the global configuration killswitch"'
       : `"${item.name}"`,
   ) {
     return request(`/api/evidence/${item.data_id}`, {

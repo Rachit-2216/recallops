@@ -7,13 +7,13 @@ import { IncidentCockpit } from "./IncidentCockpit";
 
 const detail = {
   incident: {
-    id: "INC-2048",
-    title: "Checkout outage after deploy-418",
+    id: "CF-OUTAGE-2025-12-05",
+    title: "Cloudflare HTTP 500 outage",
     severity: "SEV1",
-    service: "checkout-api",
+    service: "Cloudflare FL1 proxy",
     status: "active",
-    session_id: "incident:INC-2048",
-    started_at: "2026-06-28T08:10:00Z",
+    session_id: "incident:CF-OUTAGE-2025-12-05",
+    started_at: "2025-12-05T08:47:00Z",
     resolved_at: null,
   },
   observations: [],
@@ -42,7 +42,11 @@ function renderState(recallPayload: unknown, status = 200) {
   });
   render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={["/app/incidents/INC-2048?demo=checkout"]}>
+      <MemoryRouter
+        initialEntries={[
+          "/app/incidents/CF-OUTAGE-2025-12-05?demo=cloudflare",
+        ]}
+      >
         <Routes>
           <Route
             path="/app/incidents/:incidentId"

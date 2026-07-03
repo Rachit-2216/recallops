@@ -12,49 +12,53 @@ import {
 } from "./MemoryGraph";
 
 const SEEDED_MEMORY_NODES: MemoryNode[] = [
-  { id: "deploy", label: "deploy-418", kind: "deployment" },
-  { id: "ttl", label: "session TTL configuration", kind: "dependency" },
-  { id: "redis", label: "Redis sessions", kind: "dependency" },
-  { id: "misses", label: "session misses", kind: "symptom" },
-  { id: "prior", label: "INC-1842", kind: "incident" },
-  { id: "flush", label: "flush all Redis cache", kind: "resolution" },
+  { id: "change", label: "global WAF config", kind: "deployment" },
+  { id: "execute", label: "FL1 execute object", kind: "dependency" },
+  { id: "nil", label: "nil dereference", kind: "dependency" },
+  { id: "errors", label: "HTTP 500 errors", kind: "symptom" },
+  { id: "prior", label: "November 18 outage", kind: "incident" },
+  {
+    id: "unsafe",
+    label: "global killswitch is always safe",
+    kind: "resolution",
+  },
 ];
 
 const SEEDED_MEMORY_EDGES: MemoryEdge[] = [
   {
-    id: "edge-changed",
-    source: "deploy",
-    target: "ttl",
-    label: "changed",
-    evidenceDataId: "a0f3df9f-bfa2-5826-a5dd-1a39e1442327",
+    id: "edge-removed",
+    source: "change",
+    target: "execute",
+    label: "removed",
+    evidenceDataId: "14a64a50-0d7f-59c2-91cc-f2c3f5e66180",
   },
   {
-    id: "edge-affects",
-    source: "ttl",
-    target: "redis",
-    label: "affects",
-    evidenceDataId: "e720a10a-eea4-5cca-b747-faac6b1ad7c8",
+    id: "edge-triggered",
+    source: "execute",
+    target: "nil",
+    label: "triggered",
+    evidenceDataId: "bb5452e4-ad31-5b98-b703-ac30dbd8592f",
   },
   {
     id: "edge-caused",
-    source: "redis",
-    target: "misses",
+    source: "nil",
+    target: "errors",
     label: "caused",
-    evidenceDataId: "3cc911c6-cdfc-5582-b10c-4107bfa6d4d0",
+    evidenceDataId: "61cabe3d-4609-5940-9234-4818ab2cff32",
   },
   {
     id: "edge-resembles",
-    source: "misses",
+    source: "errors",
     target: "prior",
-    label: "resembles",
-    evidenceDataId: "e720a10a-eea4-5cca-b747-faac6b1ad7c8",
+    label: "shares blast-radius risk",
+    evidenceDataId: "e106b3e1-46de-549f-a229-e451b34e7205",
   },
   {
     id: "edge-stale",
-    source: "redis",
-    target: "flush",
-    label: "obsolete advice",
-    evidenceDataId: "a8307fb4-8acb-5342-a97f-56548e38fc97",
+    source: "change",
+    target: "unsafe",
+    label: "unsafe assumption",
+    evidenceDataId: "bc1e5f47-cce5-5865-b7db-4a8cf68d5680",
   },
 ];
 
@@ -90,7 +94,7 @@ export function MemoryExplorer() {
         <div className="graph-stage">
           <div className="graph-stage__header">
             <Network size={16} aria-hidden="true" />
-            <span>INC-2048 relationship trace</span>
+            <span>CF-OUTAGE-2025-12-05 relationship trace</span>
             <strong>NO INFERRED EDGES</strong>
           </div>
           <MemoryGraph

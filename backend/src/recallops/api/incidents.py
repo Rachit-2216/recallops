@@ -104,9 +104,7 @@ def _incident_payload(incident: Incident) -> dict[str, object]:
         "session_id": incident.session_id,
         "started_at": incident.started_at.isoformat(),
         "resolved_at": (
-            incident.resolved_at.isoformat()
-            if incident.resolved_at is not None
-            else None
+            incident.resolved_at.isoformat() if incident.resolved_at is not None else None
         ),
     }
 
@@ -202,9 +200,7 @@ async def get_incident(incident_id: str, request: Request) -> dict[str, object]:
         )
         return {
             "incident": _incident_payload(incident),
-            "observations": [
-                _observation_payload(observation) for observation in observations
-            ],
+            "observations": [_observation_payload(observation) for observation in observations],
             "recalls": [
                 {
                     "trace_id": trace.id,
@@ -348,9 +344,7 @@ async def recall_incident(
             "verification": result.verification.value,
             "source": result.source,
             "search_type": result.search_type,
-            "references": [
-                _reference_payload(reference) for reference in result.references
-            ],
+            "references": [_reference_payload(reference) for reference in result.references],
             "trace_id": result.trace_id,
             "why_recalled": list(result.why_recalled),
             "no_result": result.no_result,
@@ -383,9 +377,7 @@ async def get_recall_trace(
             "verification": trace.verification_state,
             "source": trace.source,
             "search_type": trace.search_type,
-            "references": [
-                _reference_payload(reference) for reference in references
-            ],
+            "references": [_reference_payload(reference) for reference in references],
             "why_recalled": list(why_recalled_for(references)),
             "latency_ms": trace.latency_ms,
         }
@@ -475,9 +467,7 @@ async def resolve_incident(
             "mitigation": resolution.mitigation,
             "verification": resolution.verification,
             "confirmed_at": (
-                resolution.confirmed_at.isoformat()
-                if resolution.confirmed_at is not None
-                else None
+                resolution.confirmed_at.isoformat() if resolution.confirmed_at is not None else None
             ),
             "trace_ids": body.trace_ids,
         }

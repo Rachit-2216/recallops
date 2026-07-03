@@ -1,8 +1,7 @@
 import { CornerDownLeft, Search } from "lucide-react";
 import { useState } from "react";
 
-const DEMO_QUERY =
-  "How is deploy-418 related to the previous Redis incident?";
+import { PUBLIC_CASE_STUDY } from "../demo/publicCaseStudy";
 
 export function RecallComposer({
   demo,
@@ -13,7 +12,9 @@ export function RecallComposer({
   disabled?: boolean;
   onSubmit: (query: string) => void;
 }) {
-  const [query, setQuery] = useState(demo ? DEMO_QUERY : "");
+  const [query, setQuery] = useState(
+    demo ? PUBLIC_CASE_STUDY.recallQuestion : "",
+  );
 
   function submit() {
     const value = query.trim();

@@ -18,5 +18,5 @@ it("reserves root and exposes the application navigation", () => {
     "href",
     "/app/evidence",
   );
-  expect(screen.getByText(/synthetic demo/i)).toBeVisible();
+  expect(screen.getByText(/public case study/i)).toBeVisible();
 });

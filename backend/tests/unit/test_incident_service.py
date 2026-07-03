@@ -44,9 +44,9 @@ async def test_incident_id_must_match_locked_format(
     with pytest.raises(IncidentInputError, match="INC-"):
         await service.create(
             incident_id=incident_id,
-            title="Checkout outage",
+            title="Edge proxy outage",
             severity="SEV1",
-            service="checkout-api",
+            service="edge-proxy",
         )
 
 
@@ -57,15 +57,15 @@ async def test_create_strips_fields_and_generates_session_id(
     service = IncidentService(session=session, memory=FakeCogneeAdapter())
 
     incident = await service.create(
-        incident_id="INC-2048",
-        title="  Checkout outage  ",
+        incident_id="INC-5001",
+        title="  Edge proxy outage  ",
         severity="SEV1",
-        service="  checkout-api ",
+        service="  edge-proxy ",
     )
 
-    assert incident.title == "Checkout outage"
-    assert incident.service == "checkout-api"
-    assert incident.session_id == "incident:INC-2048"
+    assert incident.title == "Edge proxy outage"
+    assert incident.service == "edge-proxy"
+    assert incident.session_id == "incident:INC-5001"
     assert incident.status == "active"
 
 
@@ -73,10 +73,10 @@ async def test_create_strips_fields_and_generates_session_id(
 async def test_duplicate_incident_is_rejected(session: AsyncSession) -> None:
     service = IncidentService(session=session, memory=FakeCogneeAdapter())
     values = {
-        "incident_id": "INC-2048",
-        "title": "Checkout outage",
+        "incident_id": "INC-5001",
+        "title": "Edge proxy outage",
         "severity": "SEV1",
-        "service": "checkout-api",
+        "service": "edge-proxy",
     }
     await service.create(**values)
 
@@ -91,20 +91,20 @@ async def test_observation_is_session_stored_when_memory_succeeds(
     memory = FakeCogneeAdapter()
     service = IncidentService(session=session, memory=memory)
     await service.create(
-        incident_id="INC-2048",
-        title="Checkout outage",
+        incident_id="INC-5001",
+        title="Edge proxy outage",
         severity="SEV1",
-        service="checkout-api",
+        service="edge-proxy",
     )
 
     observation = await service.observe(
-        incident_id="INC-2048",
-        content="Redis session misses rose after deploy-418.",
+        incident_id="INC-5001",
+        content="HTTP 500 errors rose after a WAF change.",
     )
 
     assert observation.memory_status == "session_stored"
-    assert memory.observations["incident:INC-2048"] == [
-        "Redis session misses rose after deploy-418.",
+    assert memory.observations["incident:INC-5001"] == [
+        "HTTP 500 errors rose after a WAF change.",
     ]
 
 
@@ -115,20 +115,20 @@ async def test_failed_observation_is_pending_and_retry_reuses_id(
     memory = FakeCogneeAdapter(fail_operations={"remember"})
     service = IncidentService(session=session, memory=memory)
     await service.create(
-        incident_id="INC-2048",
-        title="Checkout outage",
+        incident_id="INC-5001",
+        title="Edge proxy outage",
         severity="SEV1",
-        service="checkout-api",
+        service="edge-proxy",
     )
     pending = await service.observe(
-        incident_id="INC-2048",
-        content="Redis session misses rose after deploy-418.",
+        incident_id="INC-5001",
+        content="HTTP 500 errors rose after a WAF change.",
     )
     assert pending.memory_status == "pending"
     memory.fail_operations.clear()
 
     retried = await service.observe(
-        incident_id="INC-2048",
+        incident_id="INC-5001",
         content=pending.content,
         observation_id=pending.id,
     )

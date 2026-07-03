@@ -13,11 +13,12 @@ from recallops.memory.fake import FakeCogneeAdapter
 
 FIXTURES = Path(__file__).parents[3] / "demo" / "fixtures"
 ADMIN_HEADERS = {"X-Demo-Admin-Token": "test-demo-token"}
-RELATIONSHIP_QUERY = "How is deploy-418 related to the previous Redis incident?"
+INCIDENT_ID = "CF-OUTAGE-2025-12-05"
+RELATIONSHIP_QUERY = "How is the December 5 outage related to the November 18 outage?"
 RESOLUTION = {
-    "root_cause": "deploy-418 passed millisecond TTL values to a seconds-based adapter.",
-    "mitigation": "Rolled back the TTL configuration and reissued affected sessions.",
-    "verification": "Checkout p95 and Redis session misses returned to baseline.",
+    "root_cause": "A global killswitch exposed a nil-handling bug in FL1.",
+    "mitigation": "Reverted the global configuration and restored the prior state.",
+    "verification": "Traffic was fully restored by 09:12 UTC.",
     "confirmed_by_human": True,
 }
 
@@ -47,17 +48,20 @@ def client_and_memory() -> Iterator[tuple[TestClient, FakeCogneeAdapter]]:
 
     with TestClient(app) as client:
         assert client.post("/api/demo/reset").status_code == 200
-        assert client.post(
-            "/api/demo/seed",
-            headers=ADMIN_HEADERS,
-        ).status_code == 200
+        assert (
+            client.post(
+                "/api/demo/seed",
+                headers=ADMIN_HEADERS,
+            ).status_code
+            == 200
+        )
         yield client, memory
     asyncio.run(engine.dispose())
 
 
 def _referenced_trace(client: TestClient) -> str:
     response = client.post(
-        "/api/incidents/INC-2048/recall",
+        f"/api/incidents/{INCIDENT_ID}/recall",
         json={"query": RELATIONSHIP_QUERY},
     )
     assert response.status_code == 200
@@ -71,11 +75,11 @@ def test_feedback_is_validated_and_stored(
     trace_id = _referenced_trace(client)
 
     response = client.post(
-        "/api/incidents/INC-2048/feedback",
+        f"/api/incidents/{INCIDENT_ID}/feedback",
         json={
             "trace_id": trace_id,
             "score": 1,
-            "explanation": "The Redis relationship and cited postmortem were correct.",
+            "explanation": "The cited global-propagation relationship was correct.",
         },
     )
 
@@ -91,7 +95,7 @@ def test_resolution_rejects_missing_human_confirmation(
     trace_id = _referenced_trace(client)
 
     response = client.post(
-        "/api/incidents/INC-2048/resolve",
+        f"/api/incidents/{INCIDENT_ID}/resolve",
         json={
             **RESOLUTION,
             "trace_ids": [trace_id],
@@ -109,7 +113,7 @@ def test_resolution_promotes_and_clean_incident_recalls_verified_fix(
     trace_id = _referenced_trace(client)
 
     resolved = client.post(
-        "/api/incidents/INC-2048/resolve",
+        f"/api/incidents/{INCIDENT_ID}/resolve",
         json={**RESOLUTION, "trace_ids": [trace_id]},
     )
     created = client.post(
@@ -118,12 +122,12 @@ def test_resolution_promotes_and_clean_incident_recalls_verified_fix(
             "id": "INC-2099",
             "title": "Clean proof incident",
             "severity": "SEV3",
-            "service": "checkout-api",
+            "service": "Cloudflare FL1 proxy",
         },
     )
     proof = client.post(
         "/api/incidents/INC-2099/recall",
-        json={"query": "What verified mitigation fixed INC-2048?"},
+        json={"query": f"What verified mitigation fixed {INCIDENT_ID}?"},
     )
 
     assert resolved.status_code == 200
@@ -131,7 +135,7 @@ def test_resolution_promotes_and_clean_incident_recalls_verified_fix(
     assert resolved.json()["incident_status"] == "resolved"
     assert created.status_code == 201
     assert proof.status_code == 200
-    assert "reissued affected sessions" in proof.json()["answer"]
+    assert "restored the prior state" in proof.json()["answer"]
     assert proof.json()["source"] == "graph"
 
 
@@ -143,10 +147,10 @@ def test_improve_failure_returns_retryable_stored_state(
     memory.fail_operations.add("improve")
 
     response = client.post(
-        "/api/incidents/INC-2048/resolve",
+        f"/api/incidents/{INCIDENT_ID}/resolve",
         json={**RESOLUTION, "trace_ids": [trace_id]},
     )
-    detail = client.get("/api/incidents/INC-2048")
+    detail = client.get(f"/api/incidents/{INCIDENT_ID}")
 
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "MEMORY_PROVIDER_UNAVAILABLE"

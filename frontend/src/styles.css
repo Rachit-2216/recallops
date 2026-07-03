@@ -650,6 +650,33 @@ a {
   margin-left: auto;
 }
 
+.case-study-sources {
+  display: grid;
+  gap: 2px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.case-study-sources > strong {
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.case-study-sources .text-link {
+  padding-top: 10px;
+}
+
+.case-study-sources > small {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
 .library-summary {
   max-width: 1260px;
   gap: 9px;

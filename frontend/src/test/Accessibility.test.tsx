@@ -14,7 +14,7 @@ import { MemoryInspector } from "../features/memory/MemoryInspector";
 const evidence: EvidenceItem = {
   data_id: "e720a10a-eea4-5cca-b747-faac6b1ad7c8",
   dataset: "recallops_evidence_v1",
-  name: "postmortem-inc-1842.md",
+  name: "cloudflare-november-18-postmortem.md",
   kind: "postmortem",
   source_uri: null,
   status: "ready",
@@ -25,7 +25,7 @@ const evidence: EvidenceItem = {
 };
 
 const recall: RecallResult = {
-  answer: "INC-1842 shares the Redis session-TTL failure mode.",
+  answer: "November 18 shares the global-configuration blast-radius risk.",
   verification: "referenced",
   source: "graph",
   search_type: "GRAPH_COMPLETION_CONTEXT_EXTENSION",
@@ -50,12 +50,12 @@ const recall: RecallResult = {
 
 const detail = {
   incident: {
-    id: "INC-2048",
-    title: "Checkout outage after deploy-418",
+    id: "CF-OUTAGE-2025-12-05",
+    title: "Cloudflare HTTP 500 outage",
     severity: "SEV1",
-    service: "checkout-api",
+    service: "Cloudflare FL1 proxy",
     status: "active",
-    session_id: "incident:INC-2048",
+    session_id: "incident:CF-OUTAGE-2025-12-05",
     started_at: "2026-06-28T08:10:00Z",
     resolved_at: null,
   },
@@ -102,7 +102,9 @@ it("has no automated accessibility violations in the incident cockpit", async ()
   );
   const { container } = render(
     queryProvider(
-      <MemoryRouter initialEntries={["/app/incidents/INC-2048"]}>
+      <MemoryRouter
+        initialEntries={["/app/incidents/CF-OUTAGE-2025-12-05"]}
+      >
         <Routes>
           <Route
             path="/app/incidents/:incidentId"
@@ -112,7 +114,7 @@ it("has no automated accessibility violations in the incident cockpit", async ()
       </MemoryRouter>,
     ),
   );
-  expect(await screen.findByText("INC-2048")).toBeVisible();
+  expect(await screen.findByText("CF-OUTAGE-2025-12-05")).toBeVisible();
   expect((await axe(container)).violations).toEqual([]);
 });
 
@@ -146,7 +148,7 @@ it("has no automated accessibility violations in the resolution panel", async ()
     queryProvider(
       <MemoryRouter>
         <ResolutionPanel
-          incidentId="INC-2048"
+          incidentId="CF-OUTAGE-2025-12-05"
           onResolve={() =>
             Promise.resolve({
               promotion_state: "promoted",

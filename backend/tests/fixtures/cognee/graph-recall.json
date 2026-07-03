@@ -1,14 +1,14 @@
 [
   {
     "_source": "graph",
-    "answer": "INC-1842 is the closest prior incident because both outages changed Redis session TTL behavior.",
+    "answer": "November 18 is the closest prior incident because both outages exposed rapid global configuration propagation.",
     "search_type": "GRAPH_COMPLETION_CONTEXT_EXTENSION",
     "references": [
       {
         "data_id": "11111111-1111-4111-8111-111111111111",
         "chunk_id": "22222222-2222-4222-8222-222222222222",
-        "document_name": "postmortem-inc-1842.md",
-        "snippet": "The checkout session TTL changed from seconds to milliseconds without conversion."
+        "document_name": "cloudflare-november-18-postmortem.md",
+        "snippet": "The larger feature file was rapidly propagated across the network."
       }
     ]
   }

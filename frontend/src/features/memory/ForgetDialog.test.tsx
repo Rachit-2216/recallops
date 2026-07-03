@@ -7,7 +7,7 @@ import { ForgetDialog } from "./ForgetDialog";
 const item: EvidenceItem = {
   data_id: "8bb6ef4e-2320-5d12-9d19-63130ba810fa",
   dataset: "recallops_evidence_v1",
-  name: "stale-cache-reset-rule.md",
+  name: "unsafe-global-killswitch-assumption.md",
   kind: "runbook",
   source_uri: null,
   status: "ready",

@@ -41,7 +41,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-it("resets the synthetic incident and opens the checkout outage", async () => {
+it("opens the attributed Cloudflare public incident case study", async () => {
   vi.spyOn(globalThis, "fetch").mockImplementation(async (input, options) => {
     const path = String(input);
     if (path === "/api/evidence") {
@@ -51,12 +51,12 @@ it("resets the synthetic incident and opens the checkout outage", async () => {
             {
               data_id: "evidence-1",
               dataset: "recallops_evidence_v1",
-              name: "postmortem-inc-1842.md",
+              name: "cloudflare-november-18-postmortem.md",
               kind: "postmortem",
               source_uri: null,
               status: "ready",
               content_hash: "sha256:test",
-              source_date: "2026-05-14T00:00:00Z",
+              source_date: "2025-11-18T00:00:00Z",
               is_stale: false,
               memory_layer: "permanent",
             },
@@ -69,23 +69,32 @@ it("resets the synthetic incident and opens the checkout outage", async () => {
     expect(options?.method).toBe("POST");
     return new Response(
       JSON.stringify({
-        incident_id: "INC-2048",
+        incident_id: "CF-OUTAGE-2025-12-05",
         observation_count: 3,
         candidate_count: 1,
-        synthetic: true,
+        case_study: "public_postmortem",
       }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
   });
 
   renderDemo();
+  expect(
+    screen.getByText(/derived from official Cloudflare postmortems/i),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("link", { name: /December 5 outage postmortem/i }),
+  ).toHaveAttribute(
+    "href",
+    "https://blog.cloudflare.com/5-december-2025-outage/",
+  );
   fireEvent.click(
-    screen.getByRole("button", { name: /load checkout outage demo/i }),
+    screen.getByRole("button", { name: /load Cloudflare outage case study/i }),
   );
 
   await waitFor(() =>
     expect(screen.getByLabelText("current route")).toHaveTextContent(
-      "/app/incidents/INC-2048",
+      "/app/incidents/CF-OUTAGE-2025-12-05",
     ),
   );
 });

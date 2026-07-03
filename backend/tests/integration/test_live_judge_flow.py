@@ -25,27 +25,24 @@ ROOT = Path(__file__).parents[3]
 FIXTURES = ROOT / "demo" / "fixtures"
 REPORT = ROOT / "outputs" / "live-lifecycle-report.json"
 DATASET = "recallops_evidence_v1"
-SESSION = "incident:INC-2048"
-PROOF_SESSION = "incident:INC-2048-proof"
-RELATIONSHIP_QUERY = "How is deploy-418 related to the previous Redis incident?"
-STALE_QUERY = '"flush all Redis cache"'
+INCIDENT_ID = "CF-OUTAGE-2025-12-05"
+SESSION = f"incident:{INCIDENT_ID}"
+PROOF_SESSION = f"incident:{INCIDENT_ID}-proof"
+RELATIONSHIP_QUERY = "How is the December 5 outage related to the November 18 outage?"
+STALE_QUERY = '"Any WAF rule can be disabled through the global configuration killswitch"'
 FIXTURE_PROBES = {
-    "postmortem-inc-1842.md": "INC-1842 Redis TTL root cause",
-    "checkout-runbook-v3.md": "checkout runbook session TTL mitigation",
-    "stale-cache-reset-rule.md": STALE_QUERY,
-    "deploy-418.json": "deploy-418 SESSION_TTL_MS",
-    "checkout-errors.log": "checkout p95 Redis session misses",
-    "payment-gateway-baseline.md": "payment gateway baseline",
+    "cloudflare-december-5-postmortem.md": "December 5 FL1 execute nil",
+    "cloudflare-november-18-postmortem.md": ("November 18 Bot Management feature file"),
+    "code-orange-fail-small-guidance.md": "controlled rollout health rollback",
+    "unsafe-global-killswitch-assumption.md": STALE_QUERY,
+    "cloudflare-december-5-change.json": "global WAF configuration killswitch",
+    "cloudflare-december-5-derived-events.log": ("08:47 09:11 09:12 traffic restored"),
 }
 
 
 def _documents(entries: list[RecallEntry]) -> list[str]:
     return sorted(
-        {
-            reference.document_name
-            for entry in entries
-            for reference in entry.references
-        },
+        {reference.document_name for entry in entries for reference in entry.references},
     )
 
 
@@ -105,7 +102,9 @@ async def test_one_controlled_live_judge_lifecycle() -> None:
         )
 
     timeline = json.loads(
-        (FIXTURES / "incident-2048-timeline.json").read_text(encoding="utf-8"),
+        (FIXTURES / "cloudflare-december-5-timeline.json").read_text(
+            encoding="utf-8",
+        ),
     )
     started = monotonic()
     for observation in timeline["observations"]:
@@ -132,7 +131,7 @@ async def test_one_controlled_live_judge_lifecycle() -> None:
         ),
     )
     relationship_documents = _documents(recalled)
-    assert "postmortem-inc-1842.md" in relationship_documents
+    assert "cloudflare-november-18-postmortem.md" in relationship_documents
     report["operations"].append(
         {
             "operation": "relationship_recall",
@@ -142,7 +141,8 @@ async def test_one_controlled_live_judge_lifecycle() -> None:
         },
     )
 
-    stale_id = DemoService.fixture_data_id("stale-cache-reset-rule.md")
+    stale_name = "unsafe-global-killswitch-assumption.md"
+    stale_id = DemoService.fixture_data_id(stale_name)
     started = monotonic()
     forgotten = await memory.forget_evidence_item(DATASET, stale_id)
     assert forgotten.status in {"deleted", "not_found"}
@@ -154,22 +154,21 @@ async def test_one_controlled_live_judge_lifecycle() -> None:
         ),
     )
     after_documents = _documents(after_forget)
-    assert "stale-cache-reset-rule.md" not in after_documents
+    assert stale_name not in after_documents
     report["operations"].append(
         {
             "operation": "forget_one",
             "status": forgotten.status,
-            "document": "stale-cache-reset-rule.md",
+            "document": stale_name,
             "verified_absent": True,
             "duration_ms": round((monotonic() - started) * 1000, 2),
         },
     )
 
     resolution = (
-        "Verified resolution for INC-2048: Root cause: deploy-418 passed "
-        "millisecond TTL values to a seconds-based adapter. Mitigation: rolled "
-        "back the TTL configuration and reissued affected sessions. Verification: "
-        "checkout p95 and Redis session misses returned to baseline."
+        f"Verified resolution for {INCIDENT_ID}: Root cause: a global killswitch "
+        "exposed nil handling in FL1. Mitigation: used a controlled rollout and "
+        "rollback. Verification: traffic was restored by 09:12 UTC."
     )
     started = monotonic()
     remembered = await memory.remember_observation(SESSION, resolution)
@@ -188,14 +187,14 @@ async def test_one_controlled_live_judge_lifecycle() -> None:
     started = monotonic()
     proof = await memory.recall(
         RecallRequest(
-            query="What verified mitigation fixed INC-2048?",
+            query=f"What verified mitigation fixed {INCIDENT_ID}?",
             dataset=DATASET,
             session_id=PROOF_SESSION,
         ),
     )
     proof_documents = _documents(proof)
     proof_text = " ".join(entry.answer for entry in proof)
-    assert "reissued affected sessions" in proof_text.casefold()
+    assert "controlled rollout" in proof_text.casefold()
     assert proof_documents
     report["operations"].append(
         {

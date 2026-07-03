@@ -32,11 +32,11 @@ async def test_audit_record_contains_safe_operation_context(
     started_at = datetime(2026, 6, 28, 8, 10, tzinfo=UTC)
     operation = await repository.start(
         request_id="11111111-1111-4111-8111-111111111111",
-        incident_id="INC-2048",
+        incident_id="CF-OUTAGE-2025-12-05",
         trace_id="22222222-2222-4222-8222-222222222222",
         operation="recall",
         dataset="recallops_evidence_v1",
-        target_id="incident:INC-2048",
+        target_id="incident:CF-OUTAGE-2025-12-05",
         estimated_tokens=20_000,
         started_at=started_at,
     )
@@ -49,11 +49,11 @@ async def test_audit_record_contains_safe_operation_context(
     await session.commit()
 
     assert operation.request_id == "11111111-1111-4111-8111-111111111111"
-    assert operation.incident_id == "INC-2048"
+    assert operation.incident_id == "CF-OUTAGE-2025-12-05"
     assert operation.trace_id == "22222222-2222-4222-8222-222222222222"
     assert operation.operation == "recall"
     assert operation.dataset == "recallops_evidence_v1"
-    assert operation.target_id == "incident:INC-2048"
+    assert operation.target_id == "incident:CF-OUTAGE-2025-12-05"
     assert operation.duration_ms == 125
     assert operation.success is True
     assert operation.error_category is None

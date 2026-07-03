@@ -122,9 +122,7 @@ class IncidentService:
             return observation
 
         observation.memory_status = (
-            "session_stored"
-            if receipt.status in {"completed", "session_stored"}
-            else "pending"
+            "session_stored" if receipt.status in {"completed", "session_stored"} else "pending"
         )
         await self._session.commit()
         return observation

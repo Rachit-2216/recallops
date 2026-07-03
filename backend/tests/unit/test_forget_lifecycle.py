@@ -46,7 +46,7 @@ async def _ready_stale_item(
     item = EvidenceItem(
         data_id=STALE_ID,
         dataset=DATASET,
-        name="stale-cache-reset-rule.md",
+        name="unsafe-global-killswitch-assumption.md",
         kind="runbook",
         status="ready",
         content_hash="sha256:stale",
@@ -59,7 +59,7 @@ async def _ready_stale_item(
             data_id=STALE_ID,
             dataset=DATASET,
             name=item.name,
-            content="Obsolete guidance: flush all Redis cache.",
+            content="Any WAF rule can be disabled through the global killswitch.",
         ),
     )
     return item
@@ -79,8 +79,8 @@ async def test_forget_succeeds_only_after_recall_proves_absence(
 
     result = await service.forget_evidence(
         item=item,
-        confirmation="FORGET stale-cache-reset-rule.md",
-        verification_query='"flush all Redis cache"',
+        confirmation="FORGET unsafe-global-killswitch-assumption.md",
+        verification_query='"Any WAF rule can be disabled"',
         request_id="11111111-1111-4111-8111-111111111111",
     )
 
@@ -105,8 +105,8 @@ async def test_forget_requires_exact_confirmation(
     with pytest.raises(ForgetConfirmationMismatch):
         await service.forget_evidence(
             item=item,
-            confirmation="forget stale-cache-reset-rule.md",
-            verification_query='"flush all Redis cache"',
+            confirmation="forget unsafe-global-killswitch-assumption.md",
+            verification_query='"Any WAF rule can be disabled"',
             request_id="22222222-2222-4222-8222-222222222222",
         )
 
@@ -130,8 +130,8 @@ async def test_forget_rejects_non_ready_evidence(
     with pytest.raises(MemoryStateConflict, match="ready"):
         await service.forget_evidence(
             item=item,
-            confirmation="FORGET stale-cache-reset-rule.md",
-            verification_query='"flush all Redis cache"',
+            confirmation="FORGET unsafe-global-killswitch-assumption.md",
+            verification_query='"Any WAF rule can be disabled"',
             request_id="33333333-3333-4333-8333-333333333333",
         )
 
@@ -161,8 +161,8 @@ async def test_failed_absence_verification_keeps_item_visible_and_audits_failure
     with pytest.raises(ForgetVerificationFailed):
         await service.forget_evidence(
             item=item,
-            confirmation="FORGET stale-cache-reset-rule.md",
-            verification_query='"flush all Redis cache"',
+            confirmation="FORGET unsafe-global-killswitch-assumption.md",
+            verification_query='"Any WAF rule can be disabled"',
             request_id="44444444-4444-4444-8444-444444444444",
         )
 

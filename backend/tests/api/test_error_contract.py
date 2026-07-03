@@ -14,10 +14,10 @@ from recallops.memory.fake import FakeCogneeAdapter
 
 FIXTURES = Path(__file__).parents[3] / "demo" / "fixtures"
 INCIDENT = {
-    "id": "INC-2048",
-    "title": "Checkout outage",
+    "id": "INC-5001",
+    "title": "Cloudflare HTTP 500 outage",
     "severity": "SEV1",
-    "service": "checkout-api",
+    "service": "Cloudflare FL1 proxy",
 }
 
 
@@ -142,14 +142,14 @@ def test_429_uses_safe_error_envelope(
     for _ in range(20):
         assert (
             client.post(
-                "/api/incidents/INC-2048/recall",
+                "/api/incidents/INC-5001/recall",
                 json={"query": "no matching memory"},
                 headers={"X-Demo-Session": "rate-limit-contract"},
             ).status_code
             == 200
         )
     response = client.post(
-        "/api/incidents/INC-2048/recall",
+        "/api/incidents/INC-5001/recall",
         json={"query": "no matching memory"},
         headers={"X-Demo-Session": "rate-limit-contract"},
     )
@@ -163,8 +163,8 @@ def test_503_uses_safe_retryable_memory_error(
     assert client.post("/api/incidents", json=INCIDENT).status_code == 201
     memory.fail_operations.add("recall")
     response = client.post(
-        "/api/incidents/INC-2048/recall",
-        json={"query": "How is deploy-418 related to Redis?"},
+        "/api/incidents/INC-5001/recall",
+        json={"query": "How is December 5 related to November 18?"},
     )
     _assert_safe_error(
         response,

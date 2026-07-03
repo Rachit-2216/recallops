@@ -60,6 +60,13 @@ async def test_seed_is_idempotent_with_stable_fixture_ids(
     assert first_ids == second_ids
     assert len(first_ids) == 6
     assert memory.operation_counts["remember"] == 6
+    sources = {item.name: item.source_uri for item in await session.scalars(select(EvidenceItem))}
+    assert sources["cloudflare-december-5-postmortem.md"] == (
+        "https://blog.cloudflare.com/5-december-2025-outage/"
+    )
+    assert sources["cloudflare-november-18-postmortem.md"] == (
+        "https://blog.cloudflare.com/18-november-2025-outage/"
+    )
 
 
 @pytest.mark.asyncio
@@ -87,8 +94,8 @@ async def test_reset_restores_demo_without_forgetting_unrelated_evidence(
     result = await service.reset()
     await service.reset()
 
-    assert result.incident_id == "INC-2048"
-    assert await session.get(Incident, "INC-2048") is not None
+    assert result.incident_id == "CF-OUTAGE-2025-12-05"
+    assert await session.get(Incident, "CF-OUTAGE-2025-12-05") is not None
     assert await session.get(EvidenceItem, unrelated.data_id) is not None
     incident_count = await session.scalar(select(func.count()).select_from(Incident))
     assert incident_count == 1
@@ -96,6 +103,6 @@ async def test_reset_restores_demo_without_forgetting_unrelated_evidence(
 
 
 def test_fixture_data_id_uses_approved_uuid5_namespace() -> None:
-    assert DemoService.fixture_data_id("postmortem-inc-1842.md") == (
-        "e720a10a-eea4-5cca-b747-faac6b1ad7c8"
-    )
+    assert DemoService.fixture_data_id(
+        "cloudflare-november-18-postmortem.md",
+    ) == ("e106b3e1-46de-549f-a229-e451b34e7205")

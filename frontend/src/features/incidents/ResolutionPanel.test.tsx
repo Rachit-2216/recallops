@@ -18,13 +18,13 @@ function renderPanel(component: React.ReactNode) {
 
 function completeForm() {
   fireEvent.change(screen.getByLabelText(/^root cause$/i), {
-    target: { value: "deploy-418 supplied TTL milliseconds to a seconds adapter." },
+    target: { value: "A global killswitch exposed nil handling in FL1." },
   });
   fireEvent.change(screen.getByLabelText(/^mitigation$/i), {
     target: { value: "Rolled back TTL configuration and reissued sessions." },
   });
   fireEvent.change(screen.getByLabelText(/^verification$/i), {
-    target: { value: "Checkout p95 and Redis misses returned to baseline." },
+    target: { value: "Traffic was fully restored by 09:12 UTC." },
   });
   fireEvent.click(screen.getByLabelText(/human confirmation/i));
 }
@@ -45,7 +45,7 @@ it("requires verified fields and prevents duplicate promotion while pending", as
   );
   renderPanel(
     <ResolutionPanel
-      incidentId="INC-2048"
+      incidentId="CF-OUTAGE-2025-12-05"
       onResolve={onResolve}
       traceIds={["trace-2048"]}
     />,
@@ -79,7 +79,7 @@ it("shows promotion_failed and allows an explicit retry", async () => {
     });
   renderPanel(
     <ResolutionPanel
-      incidentId="INC-2048"
+      incidentId="CF-OUTAGE-2025-12-05"
       onResolve={onResolve}
       traceIds={["trace-2048"]}
     />,

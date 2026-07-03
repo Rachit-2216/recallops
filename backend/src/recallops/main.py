@@ -65,10 +65,7 @@ def create_app(
         else:
             from recallops.memory.cognee_cloud import CogneeCloudAdapter
 
-            if (
-                app_settings.cognee_base_url is None
-                or app_settings.cognee_api_key is None
-            ):
+            if app_settings.cognee_base_url is None or app_settings.cognee_api_key is None:
                 raise ValueError("live Cognee mode requires cloud configuration")
             memory = CogneeCloudAdapter(
                 base_url=app_settings.cognee_base_url,
@@ -86,7 +83,8 @@ def create_app(
     )
 
     if app_settings.demo_bootstrap:
-        async def bootstrap_synthetic_demo() -> None:
+
+        async def bootstrap_public_case_study() -> None:
             if engine is not None:
                 async with engine.begin() as connection:
                     await connection.run_sync(Base.metadata.create_all)
@@ -98,9 +96,13 @@ def create_app(
                     dataset=app_settings.cognee_dataset,
                 ).seed(force=isinstance(memory, FakeCogneeAdapter))
 
-        application.router.add_event_handler("startup", bootstrap_synthetic_demo)
+        application.router.add_event_handler(
+            "startup",
+            bootstrap_public_case_study,
+        )
 
     if app_settings.e2e_mode:
+
         @application.post("/api/test/memory-failures", include_in_schema=False)
         async def set_fake_memory_failures(
             body: dict[str, list[str]],
@@ -143,9 +145,7 @@ def create_app(
         if is_public_mutation:
             client_host = request.client.host if request.client is not None else "unknown"
             demo_session = request.headers.get("X-Demo-Session", client_host)
-            mutation_counts: dict[str, tuple[float, int]] = (
-                application.state.mutation_counts
-            )
+            mutation_counts: dict[str, tuple[float, int]] = application.state.mutation_counts
             window_started, mutation_count = mutation_counts.get(
                 demo_session,
                 (started, 0),
@@ -194,9 +194,7 @@ def create_app(
             incident_id=request.path_params.get("incident_id"),
             trace_id=getattr(request.state, "trace_id", None),
             operation=getattr(request.state, "operation", None),
-            error_category=(
-                f"HTTP_{status_code}" if status_code >= 400 else None
-            ),
+            error_category=(f"HTTP_{status_code}" if status_code >= 400 else None),
         )
         return response
 

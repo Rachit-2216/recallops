@@ -27,6 +27,7 @@ from recallops.services.lifecycle import (
 )
 
 DATASET = "recallops_evidence_v1"
+INCIDENT_ID = "CF-OUTAGE-2025-12-05"
 
 
 @pytest_asyncio.fixture
@@ -44,28 +45,28 @@ async def _seed_referenced_trace(
     session: AsyncSession,
 ) -> tuple[Incident, RecallTrace]:
     incident = Incident(
-        id="INC-2048",
-        title="Checkout outage",
+        id=INCIDENT_ID,
+        title="Cloudflare HTTP 500 outage",
         severity="SEV1",
-        service="checkout-api",
+        service="Cloudflare FL1 proxy",
         status="active",
-        session_id="incident:INC-2048",
+        session_id=f"incident:{INCIDENT_ID}",
         started_at=datetime.now(UTC),
     )
     evidence = EvidenceItem(
         data_id="11111111-1111-4111-8111-111111111111",
         dataset=DATASET,
-        name="postmortem-inc-1842.md",
+        name="cloudflare-november-18-postmortem.md",
         kind="postmortem",
         status="ready",
         content_hash="sha256:postmortem",
     )
     trace = RecallTrace(
         incident_id=incident.id,
-        query="How is deploy-418 related to Redis?",
+        query="How is December 5 related to November 18?",
         source="graph",
         search_type="GRAPH_COMPLETION_CONTEXT_EXTENSION",
-        answer="INC-1842 had the same Redis TTL mismatch.",
+        answer="Both outages exposed rapid global configuration propagation.",
         verification_state="referenced",
         latency_ms=12,
     )
@@ -77,7 +78,7 @@ async def _seed_referenced_trace(
             data_id=evidence.data_id,
             chunk_id="chunk-1",
             document_name=evidence.name,
-            snippet="TTL units were not converted.",
+            snippet="Global configuration propagated without health gates.",
         ),
     )
     await session.commit()
@@ -107,7 +108,7 @@ async def test_feedback_is_stored_and_added_to_session_memory(
         incident=incident,
         trace_id=trace.id,
         score=1,
-        explanation="The Redis relationship and cited postmortem were correct.",
+        explanation="The global-propagation relationship was correctly cited.",
     )
 
     count = await session.scalar(select(func.count()).select_from(Feedback))
@@ -127,9 +128,9 @@ async def test_resolution_requires_human_confirmation_and_referenced_trace(
     with pytest.raises(ResolutionValidationError, match="human"):
         await service.resolve_incident(
             incident=incident,
-            root_cause="TTL units were not converted.",
-            mitigation="Rolled back TTL configuration.",
-            verification="Checkout p95 recovered.",
+            root_cause="FL1 dereferenced a nil execute field.",
+            mitigation="Reverted the global configuration.",
+            verification="Traffic recovered by 09:12 UTC.",
             trace_ids=[trace.id],
             confirmed_by_human=False,
             request_id="11111111-1111-4111-8111-111111111111",
@@ -140,9 +141,9 @@ async def test_resolution_requires_human_confirmation_and_referenced_trace(
     with pytest.raises(ResolutionValidationError, match="referenced"):
         await service.resolve_incident(
             incident=incident,
-            root_cause="TTL units were not converted.",
-            mitigation="Rolled back TTL configuration.",
-            verification="Checkout p95 recovered.",
+            root_cause="FL1 dereferenced a nil execute field.",
+            mitigation="Reverted the global configuration.",
+            verification="Traffic recovered by 09:12 UTC.",
             trace_ids=[trace.id],
             confirmed_by_human=True,
             request_id="22222222-2222-4222-8222-222222222222",
@@ -158,9 +159,9 @@ async def test_improve_failure_preserves_resolution_without_false_success(
 
     resolution = await _service(session, memory).resolve_incident(
         incident=incident,
-        root_cause="deploy-418 passed milliseconds to a seconds adapter.",
-        mitigation="Rolled back TTL configuration and reissued affected sessions.",
-        verification="Checkout p95 and Redis misses returned to baseline.",
+        root_cause="A global killswitch exposed nil handling in FL1.",
+        mitigation="Reverted the configuration and restored the prior state.",
+        verification="Traffic returned to normal by 09:12 UTC.",
         trace_ids=[trace.id],
         confirmed_by_human=True,
         request_id="33333333-3333-4333-8333-333333333333",
@@ -180,16 +181,16 @@ async def test_verified_resolution_is_recalled_from_clean_session(
 
     resolution = await _service(session, memory).resolve_incident(
         incident=incident,
-        root_cause="deploy-418 passed milliseconds to a seconds adapter.",
-        mitigation="Rolled back the TTL configuration and reissued affected sessions.",
-        verification="Checkout p95 and Redis misses returned to baseline.",
+        root_cause="A global killswitch exposed nil handling in FL1.",
+        mitigation="Used a controlled rollout and rolled back the configuration.",
+        verification="Traffic returned to normal by 09:12 UTC.",
         trace_ids=[trace.id],
         confirmed_by_human=True,
         request_id="44444444-4444-4444-8444-444444444444",
     )
     recalled = await memory.recall(
         RecallRequest(
-            query="What verified mitigation fixed INC-2048?",
+            query=f"What verified mitigation fixed {INCIDENT_ID}?",
             dataset=DATASET,
             session_id="incident:INC-2099",
         ),
@@ -197,11 +198,11 @@ async def test_verified_resolution_is_recalled_from_clean_session(
 
     assert resolution.promotion_state == "promoted"
     assert incident.status == "resolved"
-    assert "TTL configuration" in recalled[0].answer
-    assert "reissued affected sessions" in recalled[0].answer
+    assert "controlled rollout" in recalled[0].answer
+    assert "09:12 UTC" in recalled[0].answer
     assert recalled[0].source == "graph"
     assert recalled[0].references[0].document_name == (
-        "verified-resolution-inc-2048.md"
+        "verified-resolution-cf-outage-2025-12-05.md"
     )
     promoted_item = await session.get(
         EvidenceItem,

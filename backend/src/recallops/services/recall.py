@@ -64,13 +64,13 @@ def why_recalled_for(
     references: tuple[RecallReference, ...],
 ) -> tuple[str, ...]:
     documents = {reference.document_name for reference in references}
-    if "postmortem-inc-1842.md" not in documents:
+    if "cloudflare-november-18-postmortem.md" not in documents:
         return ()
     return (
-        "same service: checkout-api",
-        "same dependency: Redis",
-        "same symptom: session misses",
-        "same timing: immediately after deployment",
+        "same operator: Cloudflare",
+        "same distribution path: global configuration",
+        "same failure pattern: configuration reached the fleet before health gates",
+        "same blast-radius risk: fleet-wide propagation",
     )
 
 

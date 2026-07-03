@@ -14,7 +14,9 @@ from recallops.services.demo import DemoService
 
 FIXTURES = Path(__file__).parents[3] / "demo" / "fixtures"
 ADMIN_HEADERS = {"X-Demo-Admin-Token": "test-demo-token"}
-STALE_ID = DemoService.fixture_data_id("stale-cache-reset-rule.md")
+STALE_NAME = "unsafe-global-killswitch-assumption.md"
+STALE_ID = DemoService.fixture_data_id(STALE_NAME)
+STALE_QUERY = '"Any WAF rule can be disabled through the global configuration killswitch"'
 
 
 @pytest.fixture
@@ -60,7 +62,7 @@ def test_lists_seeded_evidence_and_reports_item_status(
     assert listed.status_code == 200
     assert len(listed.json()["items"]) == 6
     assert detail.status_code == 200
-    assert detail.json()["name"] == "stale-cache-reset-rule.md"
+    assert detail.json()["name"] == STALE_NAME
     assert detail.json()["is_stale"] is True
     assert status.json() == {
         "data_id": STALE_ID,
@@ -107,8 +109,8 @@ def test_forget_requires_exact_confirmation(client: TestClient) -> None:
         "DELETE",
         f"/api/evidence/{STALE_ID}",
         json={
-            "confirmation": "forget stale-cache-reset-rule.md",
-            "verification_query": '"flush all Redis cache"',
+            "confirmation": f"forget {STALE_NAME}",
+            "verification_query": STALE_QUERY,
         },
     )
 
@@ -124,8 +126,8 @@ def test_forget_returns_before_and_after_retrieval_proof(
         "DELETE",
         f"/api/evidence/{STALE_ID}",
         json={
-            "confirmation": "FORGET stale-cache-reset-rule.md",
-            "verification_query": '"flush all Redis cache"',
+            "confirmation": f"FORGET {STALE_NAME}",
+            "verification_query": STALE_QUERY,
         },
     )
 

@@ -42,15 +42,15 @@ def client() -> Iterator[TestClient]:
     asyncio.run(engine.dispose())
 
 
-def test_reset_restores_the_synthetic_incident(client: TestClient) -> None:
+def test_reset_restores_the_public_case_study(client: TestClient) -> None:
     response = client.post("/api/demo/reset")
 
     assert response.status_code == 200
     assert response.json() == {
-        "incident_id": "INC-2048",
+        "incident_id": "CF-OUTAGE-2025-12-05",
         "observation_count": 3,
         "candidate_count": 1,
-        "synthetic": True,
+        "case_study": "public_postmortem",
     }
 
 

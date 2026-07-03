@@ -7,13 +7,15 @@ test("keeps local incident work truthful when memory is degraded", async ({
   await request.post("/api/test/memory-failures", {
     data: { operations: ["health", "recall", "remember"] },
   });
-  await page.goto("/app?demo=checkout");
+  await page.goto("/app?demo=cloudflare");
   await page
-    .getByRole("button", { name: /load checkout outage demo/i })
+    .getByRole("button", { name: /load Cloudflare outage case study/i })
     .click();
-  await expect(page).toHaveURL(/\/app\/incidents\/INC-2048/);
+  await expect(page).toHaveURL(
+    /\/app\/incidents\/CF-OUTAGE-2025-12-05/,
+  );
 
-  const observation = "Operator confirms Redis misses remain elevated.";
+  const observation = "Operator confirms HTTP 500 errors remain elevated.";
   await page.getByLabel("Add observation", { exact: true }).fill(observation);
   await page
     .getByRole("button", { name: /add observation to session/i })
@@ -35,7 +37,7 @@ test("keeps local incident work truthful when memory is degraded", async ({
     page.getByText(/memory is temporarily unavailable/i),
   ).toBeVisible();
   await expect(
-    page.getByText(/INC-1842 is the closest prior incident/i),
+    page.getByText(/November 18 is the closest prior incident/i),
   ).not.toBeVisible();
 
   const health = await request.get("/api/health");

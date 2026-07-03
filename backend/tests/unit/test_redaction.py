@@ -23,9 +23,7 @@ def test_redacts_sensitive_keys_recursively() -> None:
 
 def test_redacts_cognee_key_patterns_inside_safe_fields() -> None:
     event = {
-        "safe_error": (
-            f"provider rejected {KEY_PREFIX}abcdefghijklmnopqrstuvwxyz during setup"
-        ),
+        "safe_error": (f"provider rejected {KEY_PREFIX}abcdefghijklmnopqrstuvwxyz during setup"),
     }
 
     redacted = redact_event(event)

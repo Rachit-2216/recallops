@@ -31,7 +31,7 @@ class IncidentRecord:
 
     @classmethod
     def active_demo(cls) -> IncidentRecord:
-        return cls(id="INC-2048", status=IncidentStatus.ACTIVE)
+        return cls(id="CF-OUTAGE-2025-12-05", status=IncidentStatus.ACTIVE)
 
     def resolve(
         self,
@@ -66,7 +66,7 @@ def _utc_now() -> datetime:
 class Incident(Base):
     __tablename__ = "incidents"
 
-    id: Mapped[str] = mapped_column(String(16), primary_key=True)
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
     title: Mapped[str] = mapped_column(String(200))
     severity: Mapped[str] = mapped_column(String(8))
     service: Mapped[str] = mapped_column(String(100))
@@ -341,7 +341,7 @@ class MemoryOperation(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
     request_id: Mapped[str] = mapped_column(String(36), index=True)
-    incident_id: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    incident_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
     trace_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     operation: Mapped[str] = mapped_column(String(30), index=True)
     dataset: Mapped[str] = mapped_column(String(100))

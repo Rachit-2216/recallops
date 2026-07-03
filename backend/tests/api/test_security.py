@@ -120,7 +120,7 @@ def test_excessive_recall_is_rate_limited(public_client: TestClient) -> None:
         "id": "INC-501",
         "title": "Rate limit contract",
         "severity": "SEV3",
-        "service": "checkout-api",
+        "service": "Cloudflare FL1 proxy",
     }
     assert public_client.post("/api/incidents", json=incident).status_code == 201
     for _ in range(20):

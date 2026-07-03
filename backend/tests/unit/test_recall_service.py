@@ -47,8 +47,8 @@ def test_verification_policy_requires_references_and_honors_contradiction() -> N
     reference = RecallReference(
         data_id=POSTMORTEM_ID,
         chunk_id="chunk-1",
-        document_name="postmortem-inc-1842.md",
-        snippet="TTL units were not converted.",
+        document_name="cloudflare-november-18-postmortem.md",
+        snippet="A global configuration artifact propagated without rollout gates.",
     )
     entries_with_reference = [
         RecallEntry(
@@ -85,18 +85,18 @@ async def _seed_incident_and_evidence(
     memory: FakeCogneeAdapter,
 ) -> Incident:
     incident = Incident(
-        id="INC-2048",
-        title="Checkout outage",
+        id="CF-OUTAGE-2025-12-05",
+        title="Cloudflare HTTP 500 outage",
         severity="SEV1",
-        service="checkout-api",
+        service="Cloudflare FL1 proxy",
         status="active",
-        session_id="incident:INC-2048",
+        session_id="incident:CF-OUTAGE-2025-12-05",
         started_at=datetime.now(UTC),
     )
     evidence = EvidenceItem(
         data_id=POSTMORTEM_ID,
         dataset=DATASET,
-        name="postmortem-inc-1842.md",
+        name="cloudflare-november-18-postmortem.md",
         kind="postmortem",
         status="ready",
         content_hash="sha256:postmortem",
@@ -107,7 +107,9 @@ async def _seed_incident_and_evidence(
         EvidencePayload(
             data_id=POSTMORTEM_ID,
             name=evidence.name,
-            content="INC-1842 was caused by a Redis TTL unit mismatch.",
+            content=(
+                "The November 18 outage also followed rapid global configuration propagation."
+            ),
             dataset=DATASET,
         ),
     )
@@ -140,7 +142,7 @@ async def test_recall_persists_referenced_trace_and_why_recalled(
 
     result = await _service(session, memory).ask(
         incident=incident,
-        query="How is deploy-418 related to the previous Redis incident?",
+        query="How is the December 5 outage related to the November 18 outage?",
         request_id="11111111-1111-4111-8111-111111111111",
     )
 
@@ -150,7 +152,7 @@ async def test_recall_persists_referenced_trace_and_why_recalled(
     assert result.search_type == "GRAPH_COMPLETION_CONTEXT_EXTENSION"
     assert len(result.why_recalled) == 4
     assert persisted is not None
-    assert persisted.references[0].document_name == "postmortem-inc-1842.md"
+    assert persisted.references[0].document_name == "cloudflare-november-18-postmortem.md"
 
 
 @pytest.mark.asyncio
@@ -162,7 +164,7 @@ async def test_empty_recall_is_explicit_unverified_no_result(
 
     result = await _service(session, memory).ask(
         incident=incident,
-        query="Is there a prior quantum networking failure?",
+        query="xylophonic quasar topology",
         request_id="22222222-2222-4222-8222-222222222222",
     )
 
@@ -182,6 +184,6 @@ async def test_provider_failure_is_safe_and_typed(
     with pytest.raises(MemoryProviderUnavailable):
         await _service(session, memory).ask(
             incident=incident,
-            query="How is deploy-418 related to Redis?",
+            query="How is the December 5 outage related to November 18?",
             request_id="33333333-3333-4333-8333-333333333333",
         )

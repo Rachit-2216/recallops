@@ -2,6 +2,7 @@ import {
   ArchiveX,
   CalendarDays,
   Database,
+  ExternalLink,
   FileText,
   Fingerprint,
 } from "lucide-react";
@@ -67,6 +68,17 @@ export function EvidenceCard({ item }: { item: EvidenceItem }) {
           <dd>{item.memory_layer}</dd>
         </div>
       </dl>
+      {item.source_uri ? (
+        <a
+          className="text-link"
+          href={item.source_uri}
+          rel="noreferrer"
+          target="_blank"
+        >
+          <ExternalLink size={14} aria-hidden="true" />
+          Open official source
+        </a>
+      ) : null}
       {forgotten ? (
         <p className="forgotten-note">
           <ArchiveX size={15} aria-hidden="true" />

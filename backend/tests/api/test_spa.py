@@ -10,7 +10,7 @@ SPA_FIXTURE = Path(__file__).parents[1] / "fixtures" / "spa-dist"
 def test_built_frontend_is_served_with_spa_fallback() -> None:
     client = TestClient(create_app(frontend_dist=SPA_FIXTURE))
 
-    app_route = client.get("/app/incidents/INC-2048")
+    app_route = client.get("/app/incidents/CF-OUTAGE-2025-12-05")
     asset = client.get("/assets/app.js")
     missing_api = client.get("/api/route-that-does-not-exist")
 

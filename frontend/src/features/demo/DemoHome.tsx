@@ -14,6 +14,7 @@ import { ApiError } from "../../api/client";
 import { recallOpsApi } from "../../api/recallops";
 import { OperationBanner } from "../../components/OperationBanner";
 import { StatusBadge } from "../../components/StatusBadge";
+import { PUBLIC_CASE_STUDY } from "./publicCaseStudy";
 
 type DemoHomeProps = {
   publicDemo?: boolean;
@@ -36,7 +37,7 @@ export function DemoHome({
   const reset = useMutation({
     mutationFn: recallOpsApi.resetDemo,
     onSuccess: (result) => {
-      navigate(`/app/incidents/${result.incident_id}?demo=checkout`);
+      navigate(`/app/incidents/${result.incident_id}?demo=cloudflare`);
     },
   });
   const seed = useMutation({
@@ -57,14 +58,15 @@ export function DemoHome({
     <section className="demo-home" aria-labelledby="demo-title">
       <header className="page-header">
         <div>
-          <span className="eyebrow">Incident queue / deterministic fixture</span>
+          <span className="eyebrow">Public incident case study</span>
           <h1 id="demo-title">Memory-assisted incident response</h1>
           <p>
-            Reconstruct a checkout outage from stored evidence, then verify
-            what the system may promote to permanent memory.
+            Reconstruct an outage from evidence derived from official
+            Cloudflare postmortems, then verify what may enter permanent
+            memory.
           </p>
         </div>
-        <StatusBadge tone="session">Synthetic data only</StatusBadge>
+        <StatusBadge tone="session">Public case study</StatusBadge>
       </header>
 
       <div className="demo-grid">
@@ -72,28 +74,28 @@ export function DemoHome({
           <div className="demo-card__index">DEMO / 01</div>
           <div className="demo-card__title-row">
             <div>
-              <span className="eyebrow">SEV1 · checkout-api</span>
-              <h2>Checkout latency after deploy-418</h2>
+              <span className="eyebrow">SEV1 · Cloudflare FL1 proxy</span>
+              <h2>HTTP 500 errors after a global WAF configuration change</h2>
             </div>
             <span className="severity-chip">SEV1</span>
           </div>
           <p className="demo-card__summary">
-            Correlate a 4-second p95 spike and a 640% Redis miss increase with a
-            prior, verified session-TTL incident.
+            Correlate 28% affected HTTP traffic and 25 minutes of impact with
+            the November 18 outage and its shared global-propagation risk.
           </p>
 
           <dl className="signal-grid">
             <div>
-              <dt>Deploy</dt>
-              <dd>deploy-418</dd>
+              <dt>Change</dt>
+              <dd>global WAF config</dd>
             </div>
             <div>
               <dt>Evidence</dt>
               <dd>{readyEvidence || "—"} ready</dd>
             </div>
             <div>
-              <dt>Mode</dt>
-              <dd>offline-safe</dd>
+              <dt>Source</dt>
+              <dd>official postmortems</dd>
             </div>
           </dl>
 
@@ -117,7 +119,7 @@ export function DemoHome({
             type="button"
           >
             <RotateCcw size={17} aria-hidden="true" />
-            Load Checkout Outage Demo
+            Load Cloudflare outage case study
             <ArrowRight size={17} aria-hidden="true" />
           </button>
         </article>
@@ -179,7 +181,7 @@ export function DemoHome({
                 disabled={!adminToken || seed.isPending}
                 type="submit"
               >
-                Seed synthetic evidence
+                Seed public case-study evidence
               </button>
             </form>
           ) : null}
@@ -197,6 +199,26 @@ export function DemoHome({
             Inspect permanent evidence
             <ArrowRight size={15} aria-hidden="true" />
           </Link>
+          <div className="case-study-sources">
+            <strong>Official source material</strong>
+            {PUBLIC_CASE_STUDY.sources.map((source) => (
+              <a
+                className="text-link"
+                href={source.href}
+                key={source.href}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {source.label}
+                <ArrowRight size={15} aria-hidden="true" />
+              </a>
+            ))}
+            <small>
+              RecallOps is not affiliated with or endorsed by Cloudflare.
+              Derived artifacts are clearly labelled and are not raw internal
+              logs or runbooks.
+            </small>
+          </div>
         </aside>
       </div>
     </section>

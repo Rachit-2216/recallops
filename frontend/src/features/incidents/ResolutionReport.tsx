@@ -26,7 +26,7 @@ export function ResolutionReport() {
         id: proofId,
         title: `Clean-session proof for ${incidentId}`,
         severity: "SEV3",
-        service: detail.data?.incident.service ?? "checkout-api",
+        service: detail.data?.incident.service ?? "Cloudflare FL1 proxy",
       });
       return recallOpsApi.recallIncident(
         proofId,

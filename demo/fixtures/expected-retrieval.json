@@ -1,62 +1,62 @@
 [
   {
-    "question": "Which previous incident resembles the current checkout outage?",
-    "expected_documents": ["postmortem-inc-1842.md"],
-    "required_concepts": ["INC-1842", "Redis", "TTL"],
-    "forbidden_claims": ["payment gateway caused"]
+    "question": "Which previous outage most closely resembles the December 5 incident?",
+    "expected_documents": ["cloudflare-november-18-postmortem.md"],
+    "required_concepts": ["November 18", "global configuration", "propagation"],
+    "forbidden_claims": ["same immediate software bug"]
   },
   {
-    "question": "How is deploy-418 connected to Redis session misses?",
-    "expected_documents": ["deploy-418.json", "postmortem-inc-1842.md"],
-    "required_concepts": ["deploy-418", "TTL", "session misses"],
-    "forbidden_claims": ["global Redis outage"]
+    "question": "How did the December 5 WAF configuration change cause HTTP 500 errors?",
+    "expected_documents": ["cloudflare-december-5-change.json", "cloudflare-december-5-postmortem.md"],
+    "required_concepts": ["killswitch", "execute", "nil"],
+    "forbidden_claims": ["cyber attack caused the outage"]
   },
   {
-    "question": "What changed immediately before latency increased?",
-    "expected_documents": ["deploy-418.json"],
-    "required_concepts": ["SESSION_TTL_MS", "milliseconds", "conversion"],
-    "forbidden_claims": ["payment gateway deploy"]
+    "question": "How much traffic was affected and for how long?",
+    "expected_documents": ["cloudflare-december-5-postmortem.md", "cloudflare-december-5-derived-events.log"],
+    "required_concepts": ["28 percent", "25 minutes"],
+    "forbidden_claims": ["all Cloudflare traffic"]
   },
   {
-    "question": "What was the root cause of INC-1842?",
-    "expected_documents": ["postmortem-inc-1842.md"],
-    "required_concepts": ["seconds-to-milliseconds", "Redis", "TTL"],
-    "forbidden_claims": ["cache capacity"]
+    "question": "What was the root cause of the November 18 outage?",
+    "expected_documents": ["cloudflare-november-18-postmortem.md"],
+    "required_concepts": ["database permissions", "feature file", "doubled"],
+    "forbidden_claims": ["React vulnerability"]
   },
   {
-    "question": "Which runbook instruction is now stale?",
-    "expected_documents": ["stale-cache-reset-rule.md"],
-    "required_concepts": ["flush all Redis cache", "obsolete"],
-    "forbidden_claims": ["current recommended procedure"]
+    "question": "Which assumption about global killswitches is unsafe?",
+    "expected_documents": ["unsafe-global-killswitch-assumption.md"],
+    "required_concepts": ["execute", "gradual rollout", "unsafe"],
+    "forbidden_claims": ["official Cloudflare runbook"]
   },
   {
-    "question": "What evidence contradicts payment-gateway rate limiting?",
-    "expected_documents": ["checkout-errors.log", "payment-gateway-baseline.md"],
-    "required_concepts": ["baseline", "rate limit", "payment gateway"],
-    "forbidden_claims": ["payment gateway caused"]
+    "question": "What evidence contradicts the cyber-attack hypothesis?",
+    "expected_documents": ["cloudflare-december-5-postmortem.md"],
+    "required_concepts": ["configuration change", "not a cyber attack"],
+    "forbidden_claims": ["attack confirmed"]
   },
   {
-    "question": "Summarize the incident timeline.",
-    "expected_documents": ["deploy-418.json", "checkout-errors.log"],
-    "required_concepts": ["deploy-418", "4 seconds", "640 percent"],
-    "forbidden_claims": ["resolved before deployment"]
+    "question": "What sequence restored traffic on December 5?",
+    "expected_documents": ["cloudflare-december-5-derived-events.log", "cloudflare-december-5-postmortem.md"],
+    "required_concepts": ["09:11", "09:12", "reverted"],
+    "forbidden_claims": ["database restore"]
   },
   {
-    "question": "Which services depend on the affected Redis path?",
-    "expected_documents": ["postmortem-inc-1842.md", "checkout-runbook-v3.md"],
-    "required_concepts": ["checkout-api", "Redis", "session"],
-    "forbidden_claims": ["payment-gateway session store"]
+    "question": "What rollout controls does Code Orange recommend?",
+    "expected_documents": ["code-orange-fail-small-guidance.md"],
+    "required_concepts": ["controlled rollout", "health", "rollback"],
+    "forbidden_claims": ["instant global rollout"]
   },
   {
-    "question": "What mitigation was verified?",
-    "expected_documents": ["postmortem-inc-1842.md", "checkout-runbook-v3.md"],
-    "required_concepts": ["roll back", "TTL", "reissue"],
-    "forbidden_claims": ["flush all Redis cache"]
+    "question": "How should invalid configuration fail safely?",
+    "expected_documents": ["code-orange-fail-small-guidance.md"],
+    "required_concepts": ["known-good", "safe", "traffic"],
+    "forbidden_claims": ["drop all traffic"]
   },
   {
-    "question": "What did RecallOps learn after INC-2048 was resolved?",
-    "expected_documents": ["verified-resolution-inc-2048.md"],
-    "required_concepts": ["TTL configuration", "reissued affected sessions"],
-    "forbidden_claims": ["learned before human confirmation"]
+    "question": "What did RecallOps learn after CF-OUTAGE-2025-12-05 was resolved?",
+    "expected_documents": ["verified-resolution-cf-outage-2025-12-05.md"],
+    "required_concepts": ["controlled rollout", "rollback", "09:12"],
+    "forbidden_claims": ["global killswitch is always safe"]
   }
 ]

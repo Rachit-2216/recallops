@@ -72,9 +72,7 @@ class FakeCogneeAdapter:
         def references_for(*names: str) -> tuple[RecallReference, ...]:
             expected = set(names)
             return tuple(
-                self._reference(payload)
-                for payload in dataset.values()
-                if payload.name in expected
+                self._reference(payload) for payload in dataset.values() if payload.name in expected
             )
 
         if "verified mitigation" in query or "learn" in query:
@@ -82,7 +80,7 @@ class FakeCogneeAdapter:
                 (
                     payload
                     for payload in dataset.values()
-                    if payload.name == "verified-resolution-inc-2048.md"
+                    if payload.name == "verified-resolution-cf-outage-2025-12-05.md"
                 ),
                 None,
             )
@@ -99,76 +97,88 @@ class FakeCogneeAdapter:
 
         golden_routes = (
             (
-                "which previous incident resembles",
+                "which previous outage most closely resembles",
                 (
-                    "INC-1842 resembles the current checkout outage: both involved "
-                    "Redis session TTL behavior after a deployment."
+                    "The November 18 outage most closely resembles the December 5 "
+                    "incident because both exposed the blast-radius risk of rapid "
+                    "global configuration propagation."
                 ),
-                ("postmortem-inc-1842.md",),
+                ("cloudflare-november-18-postmortem.md",),
             ),
             (
-                "connected to redis session misses",
+                "how did the december 5 waf configuration change",
                 (
-                    "deploy-418 changed the session TTL to milliseconds without the "
-                    "required conversion, producing Redis session misses."
+                    "The global killswitch removed the execute field from an FL1 "
+                    "rules object; Lua code then dereferenced the resulting nil "
+                    "value and returned HTTP 500 errors."
                 ),
-                ("deploy-418.json", "postmortem-inc-1842.md"),
+                (
+                    "cloudflare-december-5-change.json",
+                    "cloudflare-december-5-postmortem.md",
+                ),
             ),
             (
-                "what changed immediately before latency",
+                "how much traffic was affected",
                 (
-                    "deploy-418 changed SESSION_TTL_MS to milliseconds while the "
-                    "adapter still required a seconds-to-milliseconds conversion."
+                    "Approximately 28 percent of Cloudflare HTTP traffic was "
+                    "affected for about 25 minutes."
                 ),
-                ("deploy-418.json",),
+                (
+                    "cloudflare-december-5-postmortem.md",
+                    "cloudflare-december-5-derived-events.log",
+                ),
             ),
             (
-                "root cause of inc-1842",
+                "root cause of the november 18 outage",
                 (
-                    "INC-1842 was caused by a missing seconds-to-milliseconds "
-                    "conversion in Redis session TTL handling."
+                    "A database permissions change caused duplicate rows in the "
+                    "Bot Management feature file, which doubled before global "
+                    "propagation."
                 ),
-                ("postmortem-inc-1842.md",),
+                ("cloudflare-november-18-postmortem.md",),
             ),
             (
-                "which runbook instruction is now stale",
+                "which assumption about global killswitches is unsafe",
                 (
-                    "The instruction to flush all Redis cache is obsolete and was "
-                    "superseded by checkout-runbook-v3."
+                    "It is unsafe to assume a global killswitch can remove execute "
+                    "without validation or a gradual rollout."
                 ),
-                ("stale-cache-reset-rule.md",),
+                ("unsafe-global-killswitch-assumption.md",),
             ),
             (
-                "contradicts payment-gateway rate limiting",
+                "contradicts the cyber-attack hypothesis",
                 (
-                    "Payment gateway latency stayed at baseline and no rate limit "
-                    "response aligned with the checkout errors."
+                    "Cloudflare's postmortem attributes the failure to its own "
+                    "configuration change, not a cyber attack."
                 ),
-                ("checkout-errors.log", "payment-gateway-baseline.md"),
+                ("cloudflare-december-5-postmortem.md",),
             ),
             (
-                "summarize the incident timeline",
+                "sequence restored traffic",
                 (
-                    "deploy-418 was followed by checkout p95 above 4 seconds and a "
-                    "640 percent increase in Redis session misses."
+                    "Operators reverted the configuration at 09:11 UTC, and "
+                    "traffic was restored by 09:12 UTC."
                 ),
-                ("deploy-418.json", "checkout-errors.log"),
+                (
+                    "cloudflare-december-5-derived-events.log",
+                    "cloudflare-december-5-postmortem.md",
+                ),
             ),
             (
-                "services depend on the affected redis path",
+                "what rollout controls does code orange recommend",
                 (
-                    "checkout-api depends on the Redis session path described by the "
-                    "postmortem and checkout runbook."
+                    "Code Orange recommends controlled rollout stages with health "
+                    "gates and automatic rollback when signals regress."
                 ),
-                ("postmortem-inc-1842.md", "checkout-runbook-v3.md"),
+                ("code-orange-fail-small-guidance.md",),
             ),
             (
-                "what mitigation was verified",
+                "how should invalid configuration fail safely",
                 (
-                    "The verified mitigation was to roll back the TTL configuration "
-                    "and reissue affected sessions."
+                    "Invalid configuration should preserve a known-good state or "
+                    "take a safe path that continues serving traffic."
                 ),
-                ("postmortem-inc-1842.md", "checkout-runbook-v3.md"),
+                ("code-orange-fail-small-guidance.md",),
             ),
         )
         for marker, answer, document_names in golden_routes:
@@ -182,17 +192,17 @@ class FakeCogneeAdapter:
                     ),
                 ]
 
-        if any(term in query for term in ("deploy-418", "redis incident", "related")):
+        if any(term in query for term in ("december 5", "november 18", "related")):
             relationship_evidence = references_for(
-                "postmortem-inc-1842.md",
-                "stale-cache-reset-rule.md",
+                "cloudflare-november-18-postmortem.md",
+                "unsafe-global-killswitch-assumption.md",
             )
             return [
                 RecallEntry(
                     answer=(
-                        "INC-1842 is the closest prior incident because both outages "
-                        "followed a checkout deployment that changed Redis session TTL "
-                        "behavior."
+                        "November 18 is the closest prior incident because both "
+                        "outages exposed the blast-radius risk of rapid global "
+                        "configuration propagation."
                     ),
                     source="graph",
                     search_type="GRAPH_COMPLETION_CONTEXT_EXTENSION",
@@ -206,9 +216,7 @@ class FakeCogneeAdapter:
             if any(
                 term in self._content_text(payload).casefold()
                 for raw_term in query.split()
-                if (
-                    term := raw_term.strip("\"'.,:;!?()[]{}")
-                )
+                if (term := raw_term.strip("\"'.,:;!?()[]{}"))
                 if len(term) > 3
             )
         )
@@ -241,9 +249,10 @@ class FakeCogneeAdapter:
             if resolution is None:
                 continue
             data_id = str(uuid5(NAMESPACE_URL, f"{dataset}:{session_id}:resolution"))
+            incident_id = session_id.removeprefix("incident:").lower()
             self.evidence[dataset][data_id] = EvidencePayload(
                 data_id=data_id,
-                name="verified-resolution-inc-2048.md",
+                name=f"verified-resolution-{incident_id}.md",
                 content=resolution,
                 dataset=dataset,
             )

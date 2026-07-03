@@ -8,48 +8,48 @@ import {
 } from "./MemoryGraph";
 
 const nodes: MemoryNode[] = [
-  { id: "deploy", label: "deploy-418", kind: "deployment" },
-  { id: "ttl", label: "session TTL configuration", kind: "dependency" },
-  { id: "redis", label: "Redis sessions", kind: "dependency" },
-  { id: "misses", label: "session misses", kind: "symptom" },
-  { id: "prior", label: "INC-1842", kind: "incident" },
-  { id: "flush", label: "flush all Redis cache", kind: "resolution" },
+  { id: "change", label: "global WAF config", kind: "deployment" },
+  { id: "execute", label: "FL1 execute object", kind: "dependency" },
+  { id: "nil", label: "nil dereference", kind: "dependency" },
+  { id: "errors", label: "HTTP 500 errors", kind: "symptom" },
+  { id: "prior", label: "November 18 outage", kind: "incident" },
+  { id: "unsafe", label: "global killswitch is always safe", kind: "resolution" },
 ];
 
 const edges: MemoryEdge[] = [
   {
-    id: "edge-changed",
-    source: "deploy",
-    target: "ttl",
-    label: "changed",
-    evidenceDataId: "evidence-deploy",
+    id: "edge-removed",
+    source: "change",
+    target: "execute",
+    label: "removed",
+    evidenceDataId: "evidence-change",
   },
   {
-    id: "edge-affects",
-    source: "ttl",
-    target: "redis",
-    label: "affects",
+    id: "edge-triggered",
+    source: "execute",
+    target: "nil",
+    label: "triggered",
     evidenceDataId: "evidence-postmortem",
   },
   {
     id: "edge-caused",
-    source: "redis",
-    target: "misses",
+    source: "nil",
+    target: "errors",
     label: "caused",
     evidenceDataId: "evidence-errors",
   },
   {
     id: "edge-resembles",
-    source: "misses",
+    source: "errors",
     target: "prior",
-    label: "resembles",
+    label: "shares blast-radius risk",
     evidenceDataId: "evidence-postmortem",
   },
   {
     id: "edge-stale",
-    source: "redis",
-    target: "flush",
-    label: "obsolete advice",
+    source: "change",
+    target: "unsafe",
+    label: "unsafe assumption",
     evidenceDataId: "evidence-stale",
   },
 ];
@@ -64,18 +64,18 @@ it("renders the seeded evidence-backed causal path and opens an edge reference",
     />,
   );
 
-  expect(screen.getByText("deploy-418")).toBeVisible();
-  expect(screen.getByText("changed")).toBeVisible();
-  expect(screen.getByText("session TTL configuration")).toBeVisible();
-  expect(screen.getByText("affects")).toBeVisible();
-  expect(screen.getByText("Redis sessions")).toBeVisible();
+  expect(screen.getByText("global WAF config")).toBeVisible();
+  expect(screen.getByText("removed")).toBeVisible();
+  expect(screen.getByText("FL1 execute object")).toBeVisible();
+  expect(screen.getByText("triggered")).toBeVisible();
+  expect(screen.getByText("nil dereference")).toBeVisible();
   expect(screen.getByText("caused")).toBeVisible();
-  expect(screen.getByText("session misses")).toBeVisible();
-  expect(screen.getByText("resembles")).toBeVisible();
-  expect(screen.getByText("INC-1842")).toBeVisible();
+  expect(screen.getByText("HTTP 500 errors")).toBeVisible();
+  expect(screen.getByText("shares blast-radius risk")).toBeVisible();
+  expect(screen.getByText("November 18 outage")).toBeVisible();
 
-  fireEvent.click(screen.getByTestId("edge-changed"));
-  expect(onEvidenceSelect).toHaveBeenCalledWith("evidence-deploy");
+  fireEvent.click(screen.getByTestId("edge-removed"));
+  expect(onEvidenceSelect).toHaveBeenCalledWith("evidence-change");
 });
 
 it("removes only the forgotten stale edge and preserves shared nodes", () => {
@@ -94,6 +94,6 @@ it("removes only the forgotten stale edge and preserves shared nodes", () => {
   );
 
   expect(screen.queryByTestId("edge-stale")).not.toBeInTheDocument();
-  expect(screen.getByText("Redis sessions")).toBeVisible();
+  expect(screen.getByText("global WAF config")).toBeVisible();
   expect(screen.getByTestId("edge-caused")).toBeVisible();
 });

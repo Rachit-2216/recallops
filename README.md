@@ -23,9 +23,10 @@ Ordinary search can find documents, but it does not preserve session context,
 causal relationships, evidence provenance, or the lifecycle of a corrected
 memory. RecallOps turns those artifacts into a controlled operational memory.
 
-The deterministic checkout scenario demonstrates a current SEV1 after
-`deploy-418`, its similarity to `INC-1842`, an obsolete Redis cache instruction,
-and a verified resolution that can be recalled from a clean incident session.
+The deterministic case study reconstructs Cloudflare's December 5, 2025 outage
+from official public postmortems, relates it to the November 18 outage, removes
+an explicitly labelled RecallOps-created unsafe assumption, and recalls a
+human-verified resolution from a clean incident session.
 
 ## Why Cognee is essential
 
@@ -74,18 +75,29 @@ RecallOps ships as one container:
 See [docs/architecture.md](docs/architecture.md) for trust boundaries and data
 flow.
 
-## Deterministic demo
+## Attributed public case study
 
-All fixtures are synthetic. Stable UUIDv5 evidence IDs and `INC-2048` reset
-semantics make the judge flow repeatable.
+The incident facts are derived from Cloudflare's public material. The compact
+event log and change record are derived artifacts, not raw internal records.
+The unsafe killswitch instruction is an explicit RecallOps-created anti-pattern
+used only to demonstrate item-level forgetting. Stable UUIDv5 evidence IDs and
+`CF-OUTAGE-2025-12-05` reset semantics keep the flow repeatable.
 
-1. Open `/app?demo=checkout`.
-2. Select **Load Checkout Outage Demo**.
-3. Recall the relationship to the previous Redis incident.
+1. Open `/app?demo=cloudflare`.
+2. Select **Load Cloudflare outage case study**.
+3. Recall the relationship to the November 18 outage.
 4. Inspect the graph source, retrieval type, document, chunk, and causal path.
-5. Forget `stale-cache-reset-rule.md` with the exact confirmation phrase.
+5. Forget `unsafe-global-killswitch-assumption.md` with the exact phrase.
 6. Confirm the real resolution and wait for `promoted`.
 7. Open the proof report and run **Prove in clean session**.
+
+Official sources:
+
+- [Cloudflare outage on December 5, 2025](https://blog.cloudflare.com/5-december-2025-outage/)
+- [Cloudflare outage on November 18, 2025](https://blog.cloudflare.com/18-november-2025-outage/)
+- [Code Orange: Fail Small](https://blog.cloudflare.com/fail-small-resilience-plan-uk-ua/)
+
+RecallOps is not affiliated with or endorsed by Cloudflare.
 
 ## Local setup
 
@@ -120,7 +132,7 @@ secret storage. Never commit values.
 | `APP_ENV` | `local`, `test`, or `production` |
 | `APP_DATABASE_URL` | Async SQLAlchemy URL |
 | `APP_PUBLIC_ORIGIN` | Sole allowed browser origin |
-| `APP_DEMO_MODE` | Enables the synthetic reset flow |
+| `APP_DEMO_MODE` | Enables the attributed case-study reset flow |
 | `APP_DEMO_BOOTSTRAP` | Seeds missing fixture evidence at startup |
 | `APP_DEMO_ADMIN_TOKEN` | Server-side seed authorization |
 | `APP_COGNEE_MODE` | `fake` for offline tests or `live` |
@@ -179,7 +191,8 @@ contract.
 
 ## Known limitations
 
-- The public demo uses one synthetic incident narrative.
+- The public demo covers one documented outage family and is not a general
+  incident corpus.
 - Session observations do not have an account-wide delete primitive; rejecting a
   hypothesis is a local/session lifecycle action.
 - HTTPS URL ingestion rejects redirects and private/reserved destinations; it is
@@ -196,8 +209,9 @@ contract.
 
 ## Disclosures
 
-Synthetic data: every incident, service event, deploy, log, runbook, and
-postmortem in the demo is fictional and purpose-built.
+Source use: incident facts come from the three linked Cloudflare publications.
+All derived files identify their source and status. RecallOps does not claim
+access to Cloudflare's private logs, configuration, or runbooks.
 
 AI assistance: the repository was developed with AI-assisted implementation and
 review. Product decisions, lifecycle constraints, tests, and final verification

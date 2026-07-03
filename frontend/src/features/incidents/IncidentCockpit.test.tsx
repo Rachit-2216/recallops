@@ -7,42 +7,42 @@ import { IncidentCockpit } from "./IncidentCockpit";
 
 const incidentDetail = {
   incident: {
-    id: "INC-2048",
-    title: "Checkout latency and session failures after deploy-418",
+    id: "CF-OUTAGE-2025-12-05",
+    title: "Cloudflare HTTP 500 errors after a global WAF configuration change",
     severity: "SEV1",
-    service: "checkout-api",
+    service: "Cloudflare FL1 proxy",
     status: "active",
-    session_id: "incident:INC-2048",
-    started_at: "2026-06-28T08:10:00+00:00",
+    session_id: "incident:CF-OUTAGE-2025-12-05",
+    started_at: "2025-12-05T08:47:00+00:00",
     resolved_at: null,
   },
   observations: [
     {
       id: "obs-1",
-      incident_id: "INC-2048",
-      timestamp: "2026-06-28T08:10:00+00:00",
+      incident_id: "CF-OUTAGE-2025-12-05",
+      timestamp: "2025-12-05T08:47:00+00:00",
       source: "system",
-      content: "Checkout p95 latency exceeded 4 seconds.",
+      content: "A WAF configuration change propagated globally.",
       memory_status: "session_stored",
       memory_layer: "session",
       retry_count: 0,
     },
     {
       id: "obs-2",
-      incident_id: "INC-2048",
-      timestamp: "2026-06-28T08:12:00+00:00",
+      incident_id: "CF-OUTAGE-2025-12-05",
+      timestamp: "2025-12-05T08:48:00+00:00",
       source: "system",
-      content: "Redis session misses increased 640 percent.",
+      content: "Approximately 28 percent of HTTP traffic returned errors.",
       memory_status: "session_stored",
       memory_layer: "session",
       retry_count: 0,
     },
     {
       id: "obs-3",
-      incident_id: "INC-2048",
-      timestamp: "2026-06-28T08:14:00+00:00",
+      incident_id: "CF-OUTAGE-2025-12-05",
+      timestamp: "2025-12-05T08:50:00+00:00",
       source: "human",
-      content: "Symptoms began within ten minutes of deploy-418.",
+      content: "Automated alerts declared the incident.",
       memory_status: "session_stored",
       memory_layer: "session",
       retry_count: 0,
@@ -72,7 +72,7 @@ it("renders the seeded incident signals and operator controls", async () => {
   render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter
-        initialEntries={["/app/incidents/INC-2048?demo=checkout"]}
+        initialEntries={["/app/incidents/CF-OUTAGE-2025-12-05?demo=cloudflare"]}
       >
         <Routes>
           <Route
@@ -84,15 +84,15 @@ it("renders the seeded incident signals and operator controls", async () => {
     </QueryClientProvider>,
   );
 
-  expect(await screen.findByText("INC-2048")).toBeVisible();
+  expect(await screen.findByText("CF-OUTAGE-2025-12-05")).toBeVisible();
   expect(screen.getByText("SEV1")).toBeVisible();
-  expect(screen.getByText("checkout-api")).toBeVisible();
-  expect(screen.getAllByText(/deploy-418/i).length).toBeGreaterThan(0);
-  expect(screen.getByText(/4 seconds/i)).toBeVisible();
-  expect(screen.getByText(/640 percent/i)).toBeVisible();
+  expect(screen.getByText("Cloudflare FL1 proxy")).toBeVisible();
+  expect(screen.getAllByText(/WAF configuration/i).length).toBeGreaterThan(0);
+  expect(screen.getByText(/28 percent/i)).toBeVisible();
+  expect(screen.getByText(/automated alerts/i)).toBeVisible();
   expect(screen.getByLabelText(/^add observation$/i)).toBeVisible();
   expect(screen.getByLabelText(/recall question/i)).toHaveValue(
-    "How is deploy-418 related to the previous Redis incident?",
+    "How is the December 5 outage related to the November 18 outage?",
   );
   expect(
     screen.getByRole("region", { name: /memory inspector/i }),

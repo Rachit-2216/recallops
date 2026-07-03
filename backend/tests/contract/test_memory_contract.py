@@ -9,15 +9,16 @@ from recallops.memory.fake import FakeCogneeAdapter, FakeMemoryError
 
 DATA_ID = "11111111-1111-4111-8111-111111111111"
 DATASET = "recallops_evidence_v1"
-SESSION_ID = "incident:INC-2048"
+INCIDENT_ID = "CF-OUTAGE-2025-12-05"
+SESSION_ID = f"incident:{INCIDENT_ID}"
 
 
 async def exercise_memory_contract(memory: CogneeMemoryPort) -> None:
     receipt = await memory.remember_evidence(
         EvidencePayload(
             data_id=DATA_ID,
-            name="postmortem-inc-1842.md",
-            content="INC-1842 was caused by a seconds-to-milliseconds TTL mismatch.",
+            name="cloudflare-november-18-postmortem.md",
+            content="The November 18 outage involved global configuration propagation.",
             dataset=DATASET,
         ),
     )
@@ -25,19 +26,19 @@ async def exercise_memory_contract(memory: CogneeMemoryPort) -> None:
 
     observation = await memory.remember_observation(
         session_id=SESSION_ID,
-        content="Redis session misses rose after deploy-418.",
+        content="A WAF configuration change propagated globally.",
     )
     assert observation.status == "completed"
 
     results = await memory.recall(
         RecallRequest(
-            query="How is deploy-418 related to the Redis incident?",
+            query="How is the December 5 outage related to November 18?",
             dataset=DATASET,
             session_id=SESSION_ID,
             include_trace=True,
         ),
     )
-    assert results[0].references[0].document_name == "postmortem-inc-1842.md"
+    assert results[0].references[0].document_name == ("cloudflare-november-18-postmortem.md")
 
     status = await memory.dataset_status(DATASET)
     assert status.ready is True
@@ -68,8 +69,8 @@ async def test_fake_forget_removes_only_the_target_reference() -> None:
     await memory.remember_evidence(
         EvidencePayload(
             data_id=DATA_ID,
-            name="postmortem-inc-1842.md",
-            content="INC-1842 documented the Redis TTL mismatch.",
+            name="cloudflare-november-18-postmortem.md",
+            content="November 18 exposed global configuration blast radius.",
             dataset=DATASET,
         ),
     )
@@ -77,27 +78,27 @@ async def test_fake_forget_removes_only_the_target_reference() -> None:
     await memory.remember_evidence(
         EvidencePayload(
             data_id=stale_id,
-            name="stale-cache-reset-rule.md",
-            content="Obsolete guidance: flush all Redis cache.",
+            name="unsafe-global-killswitch-assumption.md",
+            content="Any WAF rule can be disabled through the global killswitch.",
             dataset=DATASET,
         ),
     )
     request = RecallRequest(
-        query="How is deploy-418 related to the Redis incident?",
+        query="How is the December 5 outage related to November 18?",
         dataset=DATASET,
         session_id=SESSION_ID,
     )
 
     before = await memory.recall(request)
     assert {reference.document_name for reference in before[0].references} == {
-        "postmortem-inc-1842.md",
-        "stale-cache-reset-rule.md",
+        "cloudflare-november-18-postmortem.md",
+        "unsafe-global-killswitch-assumption.md",
     }
 
     await memory.forget_evidence_item(DATASET, stale_id)
     after = await memory.recall(request)
     assert {reference.document_name for reference in after[0].references} == {
-        "postmortem-inc-1842.md",
+        "cloudflare-november-18-postmortem.md",
     }
 
 
@@ -107,26 +108,24 @@ async def test_fake_improve_bridges_verified_resolution_to_clean_session() -> No
     await memory.remember_observation(
         SESSION_ID,
         (
-            "Verified resolution for INC-2048: rolled back the TTL configuration "
-            "and reissued affected sessions."
+            f"Verified resolution for {INCIDENT_ID}: used a controlled rollout, "
+            "rolled back the configuration, and restored traffic by 09:12 UTC."
         ),
     )
 
     await memory.improve_session(DATASET, [SESSION_ID])
     results = await memory.recall(
         RecallRequest(
-            query="What verified mitigation fixed INC-2048?",
+            query=f"What verified mitigation fixed {INCIDENT_ID}?",
             dataset=DATASET,
-            session_id="incident:INC-2048-proof",
+            session_id=f"incident:{INCIDENT_ID}-proof",
         ),
     )
 
-    assert "rolled back the TTL configuration" in results[0].answer
-    assert "reissued affected sessions" in results[0].answer
+    assert "controlled rollout" in results[0].answer
+    assert "09:12 UTC" in results[0].answer
     assert results[0].source == "graph"
-    assert results[0].references[0].document_name == (
-        "verified-resolution-inc-2048.md"
-    )
+    assert results[0].references[0].document_name == ("verified-resolution-cf-outage-2025-12-05.md")
 
 
 @pytest.mark.asyncio

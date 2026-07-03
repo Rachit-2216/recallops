@@ -9,8 +9,8 @@ class RecallContractError(ValueError):
 
 EVIDENCE_MARKER = "\nEvidence:\n"
 EVIDENCE_REFERENCE_PATTERN = re.compile(
-    r'^- chunk \d+ of document (?P<document_name>.+?) '
-    r'\(data_id: (?P<data_id>[^,]+), chunk_id: (?P<chunk_id>[^)]+)\): '
+    r"^- chunk \d+ of document (?P<document_name>.+?) "
+    r"\(data_id: (?P<data_id>[^,]+), chunk_id: (?P<chunk_id>[^)]+)\): "
     r'"(?P<snippet>.*)"$',
 )
 

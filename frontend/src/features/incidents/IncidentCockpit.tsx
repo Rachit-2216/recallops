@@ -110,13 +110,13 @@ export function IncidentCockpit() {
         <IncidentHeader incident={detail.incident} />
         <div className="signal-strip" aria-label="Primary incident signals">
           <span>
-            <strong>4.0s</strong> checkout p95
+            <strong>28%</strong> HTTP traffic affected
           </span>
           <span>
-            <strong>+640%</strong> Redis misses
+            <strong>25m</strong> total impact
           </span>
           <span>
-            <strong>deploy-418</strong> change window
+            <strong>08:47</strong> config propagated
           </span>
         </div>
         <ObservationComposer
@@ -160,7 +160,7 @@ export function IncidentCockpit() {
           <StatusBadge tone="graph">graph</StatusBadge>
         </div>
         <RecallComposer
-          demo={searchParams.get("demo") === "checkout"}
+          demo={searchParams.get("demo") === "cloudflare"}
           disabled={recall.isPending}
           onSubmit={(query) => recall.mutate(query)}
         />

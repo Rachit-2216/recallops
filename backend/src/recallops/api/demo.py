@@ -26,7 +26,7 @@ async def reset_demo(request: Request) -> dict[str, object]:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     async with request.app.state.session_factory() as session:
         result = await _service(request, session).reset()
-    return {**asdict(result), "synthetic": True}
+    return {**asdict(result), "case_study": "public_postmortem"}
 
 
 @router.post("/seed")

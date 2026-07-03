@@ -60,7 +60,7 @@ export function AppShell() {
         </nav>
 
         <div className="nav-rail__telemetry">
-          <StatusBadge tone="session">Synthetic demo</StatusBadge>
+          <StatusBadge tone="session">Public case study</StatusBadge>
           <div className="telemetry-row">
             <span>
               <RadioTower size={14} aria-hidden="true" /> Memory

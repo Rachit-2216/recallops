@@ -45,11 +45,7 @@ class ForgetResult:
 
 
 def _contains_reference(entries: list[RecallEntry], data_id: str) -> bool:
-    return any(
-        reference.data_id == data_id
-        for entry in entries
-        for reference in entry.references
-    )
+    return any(reference.data_id == data_id for entry in entries for reference in entry.references)
 
 
 class MemoryLifecycleService:
@@ -168,10 +164,7 @@ class MemoryLifecycleService:
         await self._session.flush()
         await self._memory.remember_observation(
             session_id=incident.session_id,
-            content=(
-                f"Human feedback score {score} for trace {trace_id}: "
-                f"{clean_explanation}"
-            ),
+            content=(f"Human feedback score {score} for trace {trace_id}: {clean_explanation}"),
         )
         await self._session.commit()
         return feedback
@@ -281,15 +274,15 @@ class MemoryLifecycleService:
         )
         promoted_item = await self._session.get(EvidenceItem, promoted_data_id)
         if promoted_item is None:
+            incident_slug = incident.id.lower()
             promoted_item = EvidenceItem(
                 data_id=promoted_data_id,
                 dataset=self._dataset,
-                name="verified-resolution-inc-2048.md",
+                name=f"verified-resolution-{incident_slug}.md",
                 kind="memory_candidate",
                 status="ready",
                 content_hash=(
-                    "sha256:"
-                    f"{hashlib.sha256(compact_resolution.encode('utf-8')).hexdigest()}"
+                    f"sha256:{hashlib.sha256(compact_resolution.encode('utf-8')).hexdigest()}"
                 ),
             )
             self._session.add(promoted_item)

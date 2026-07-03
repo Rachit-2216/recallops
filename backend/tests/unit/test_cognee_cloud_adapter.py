@@ -33,14 +33,14 @@ async def test_cloud_adapter_maps_remember_and_recall_to_sdk(
         return [
             {
                 "_source": "graph",
-                "answer": "INC-1842 had the same Redis TTL mismatch.",
+                "answer": "November 18 had the same propagation risk.",
                 "search_type": "GRAPH_COMPLETION_CONTEXT_EXTENSION",
                 "references": [
                     {
                         "data_id": DATA_ID,
                         "chunk_id": "chunk-1",
-                        "document_name": "postmortem-inc-1842.md",
-                        "snippet": "TTL units were not converted.",
+                        "document_name": "cloudflare-november-18-postmortem.md",
+                        "snippet": "Configuration propagated across the network.",
                     },
                 ],
             },
@@ -66,40 +66,40 @@ async def test_cloud_adapter_maps_remember_and_recall_to_sdk(
     receipt = await adapter.remember_evidence(
         EvidencePayload(
             data_id=DATA_ID,
-            name="postmortem-inc-1842.md",
-            content="TTL units were not converted.",
+            name="cloudflare-november-18-postmortem.md",
+            content="Configuration propagated across the network.",
             dataset=DATASET,
         ),
     )
     entries = await adapter.recall(
         RecallRequest(
-            query="How is deploy-418 related to Redis?",
+            query="How is December 5 related to November 18?",
             dataset=DATASET,
-            session_id="incident:INC-2048",
+            session_id="incident:CF-OUTAGE-2025-12-05",
             include_trace=True,
         ),
     )
 
     assert calls["connect"] == ("https://memory.example.test", "test-key")
     remembered, remember_kwargs = calls["remember"]  # type: ignore[misc]
-    assert remembered.name == "postmortem-inc-1842.md"  # type: ignore[union-attr]
-    assert remembered.read() == b"TTL units were not converted."  # type: ignore[union-attr]
+    assert remembered.name == "cloudflare-november-18-postmortem.md"  # type: ignore[union-attr]
+    assert remembered.read() == b"Configuration propagated across the network."  # type: ignore[union-attr]
     assert remember_kwargs == {
         "dataset_name": DATASET,
         "self_improvement": False,
         "run_in_background": False,
     }
     assert calls["recall"] == {
-        "query_text": "How is deploy-418 related to Redis?",
+        "query_text": "How is December 5 related to November 18?",
         "datasets": [DATASET],
-        "session_id": "incident:INC-2048",
+        "session_id": "incident:CF-OUTAGE-2025-12-05",
         "verbose": True,
         "only_context": False,
         "include_references": True,
     }
     assert receipt.status == "completed"
     assert receipt.data_id == REMOTE_DATA_ID
-    assert entries[0].references[0].document_name == "postmortem-inc-1842.md"
+    assert entries[0].references[0].document_name == ("cloudflare-november-18-postmortem.md")
 
 
 @pytest.mark.asyncio
@@ -143,7 +143,7 @@ async def test_cloud_adapter_maps_lifecycle_and_status_calls(
     adapter = CogneeCloudAdapter(base_url="https://memory.test", api_key="key")
     improved = await adapter.improve_session(
         DATASET,
-        ["incident:INC-2048"],
+        ["incident:CF-OUTAGE-2025-12-05"],
     )
     forgotten = await adapter.forget_evidence_item(DATASET, DATA_ID)
     status = await adapter.dataset_status(DATASET)
@@ -154,7 +154,7 @@ async def test_cloud_adapter_maps_lifecycle_and_status_calls(
         "/api/v1/improve",
         {
             "dataset_name": DATASET,
-            "session_ids": ["incident:INC-2048"],
+            "session_ids": ["incident:CF-OUTAGE-2025-12-05"],
             "run_in_background": False,
         },
     )
@@ -183,7 +183,7 @@ async def test_cloud_adapter_adds_chunk_provenance_when_graph_recall_omits_it(
             {
                 "kind": "graph_completion",
                 "search_type": "GRAPH_COMPLETION_CONTEXT_EXTENSION",
-                "text": "The prior incident had the same TTL mismatch.",
+                "text": "The prior incident had the same propagation risk.",
                 "metadata": {},
                 "raw": {},
             },
@@ -199,12 +199,12 @@ async def test_cloud_adapter_adds_chunk_provenance_when_graph_recall_omits_it(
                     {
                         "id": "chunk-1",
                         "document_id": REMOTE_DATA_ID,
-                        "document_name": "postmortem-inc-1842",
+                        "document_name": "cloudflare-november-18-postmortem",
                         "chunk_index": 0,
-                        "text": "TTL units were not converted.",
+                        "text": "Configuration propagated across the network.",
                     },
                 ],
-                "context_result": "TTL units were not converted.",
+                "context_result": "Configuration propagated across the network.",
                 "objects_result": [],
             },
         ]
@@ -233,8 +233,8 @@ async def test_cloud_adapter_adds_chunk_provenance_when_graph_recall_omits_it(
     await adapter.remember_evidence(
         EvidencePayload(
             data_id=DATA_ID,
-            name="postmortem-inc-1842.md",
-            content="TTL units were not converted.",
+            name="cloudflare-november-18-postmortem.md",
+            content="Configuration propagated across the network.",
             dataset=DATASET,
         ),
     )
@@ -242,13 +242,11 @@ async def test_cloud_adapter_adds_chunk_provenance_when_graph_recall_omits_it(
         RecallRequest(
             query="How is this related to the prior incident?",
             dataset=DATASET,
-            session_id="incident:INC-2048",
+            session_id="incident:CF-OUTAGE-2025-12-05",
         ),
     )
 
-    assert entries[0].references == (
-        entries[0].references[0],
-    )
+    assert entries[0].references == (entries[0].references[0],)
     assert entries[0].references[0].data_id == REMOTE_DATA_ID
     assert entries[0].references[0].chunk_id == "chunk-1"
-    assert entries[0].references[0].document_name == "postmortem-inc-1842.md"
+    assert entries[0].references[0].document_name == ("cloudflare-november-18-postmortem.md")

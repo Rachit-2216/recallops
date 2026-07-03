@@ -16,8 +16,7 @@ async def _run_read_only_probe() -> int:
     parsed_url = urlparse(settings.cognee_base_url)
     if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
         print(
-            "Live Cognee probe unavailable: COGNEE_BASE_URL must be an "
-            "absolute HTTP(S) URL",
+            "Live Cognee probe unavailable: COGNEE_BASE_URL must be an absolute HTTP(S) URL",
         )
         return 2
 

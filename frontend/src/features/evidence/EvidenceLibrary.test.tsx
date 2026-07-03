@@ -18,7 +18,7 @@ const items = statuses.map((status, index) => ({
   dataset: "recallops_evidence_v1",
   name:
     status === "ready"
-      ? "stale-cache-reset-rule.md"
+      ? "unsafe-global-killswitch-assumption.md"
       : `${status}-evidence.md`,
   kind: "runbook",
   source_uri: null,

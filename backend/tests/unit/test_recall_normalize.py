@@ -5,12 +5,7 @@ import pytest
 
 from recallops.memory.normalize import RecallContractError, normalize_recall
 
-FIXTURE = (
-    Path(__file__).parents[1]
-    / "fixtures"
-    / "cognee"
-    / "graph-recall.json"
-)
+FIXTURE = Path(__file__).parents[1] / "fixtures" / "cognee" / "graph-recall.json"
 
 
 def test_normalizes_recorded_verbose_graph_response() -> None:
@@ -20,19 +15,15 @@ def test_normalizes_recorded_verbose_graph_response() -> None:
 
     assert entries[0].source == "graph"
     assert entries[0].search_type == "GRAPH_COMPLETION_CONTEXT_EXTENSION"
-    assert entries[0].references[0].data_id == (
-        "11111111-1111-4111-8111-111111111111"
-    )
-    assert entries[0].references[0].chunk_id == (
-        "22222222-2222-4222-8222-222222222222"
-    )
-    assert entries[0].references[0].document_name == "postmortem-inc-1842.md"
+    assert entries[0].references[0].data_id == ("11111111-1111-4111-8111-111111111111")
+    assert entries[0].references[0].chunk_id == ("22222222-2222-4222-8222-222222222222")
+    assert entries[0].references[0].document_name == ("cloudflare-november-18-postmortem.md")
 
 
 def test_normalizes_plain_string_response() -> None:
-    entries = normalize_recall("A prior Redis incident was found.")
+    entries = normalize_recall("A prior global-configuration incident was found.")
 
-    assert entries[0].answer == "A prior Redis incident was found."
+    assert entries[0].answer == ("A prior global-configuration incident was found.")
     assert entries[0].source == "graph"
     assert entries[0].search_type == "unknown"
     assert entries[0].references == ()
@@ -65,7 +56,7 @@ def test_normalizes_alternate_reference_key_names() -> None:
                     "dataId": "data-1",
                     "chunkId": "chunk-1",
                     "documentName": "runbook.md",
-                    "text": "Rollback the TTL configuration.",
+                    "text": "Rollback the global configuration.",
                 },
             ],
         },
@@ -75,7 +66,7 @@ def test_normalizes_alternate_reference_key_names() -> None:
     assert reference.data_id == "data-1"
     assert reference.chunk_id == "chunk-1"
     assert reference.document_name == "runbook.md"
-    assert reference.snippet == "Rollback the TTL configuration."
+    assert reference.snippet == "Rollback the global configuration."
 
 
 def test_normalizes_cognee_1_2_search_result_item_with_evidence_block() -> None:
@@ -99,12 +90,8 @@ def test_normalizes_cognee_1_2_search_result_item_with_evidence_block() -> None:
     assert entries[0].answer == "The contract marker is amber-orbit-731."
     assert entries[0].search_type == "GRAPH_COMPLETION_CONTEXT_EXTENSION"
     assert entries[0].references[0].document_name == "recallops-live-contract.txt"
-    assert entries[0].references[0].data_id == (
-        "d1d38b21-e5e8-59d3-aa7f-613a16fa960d"
-    )
-    assert entries[0].references[0].chunk_id == (
-        "22222222-2222-4222-8222-222222222222"
-    )
+    assert entries[0].references[0].data_id == ("d1d38b21-e5e8-59d3-aa7f-613a16fa960d")
+    assert entries[0].references[0].chunk_id == ("22222222-2222-4222-8222-222222222222")
 
 
 def test_rejects_unsupported_recall_rows() -> None:

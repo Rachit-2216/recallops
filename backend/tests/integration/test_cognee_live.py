@@ -32,7 +32,7 @@ async def test_live_adapter_remember_recall_and_forget_one_contract_item() -> No
         name="recallops-live-contract.txt",
         content=(
             "RecallOps contract marker 2026-06-28: amber-orbit-731. "
-            "This synthetic item exists only for the gated adapter test."
+            "This contract-only item exists only for the gated adapter test."
         ),
         dataset=DATASET,
     )
@@ -58,7 +58,5 @@ async def test_live_adapter_remember_recall_and_forget_one_contract_item() -> No
     assert forgotten.status == "deleted"
     after = await memory.recall(request)
     assert all(
-        reference.data_id != remembered.data_id
-        for entry in after
-        for reference in entry.references
+        reference.data_id != remembered.data_id for entry in after for reference in entry.references
     )

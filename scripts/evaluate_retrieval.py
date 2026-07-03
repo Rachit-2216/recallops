@@ -28,13 +28,13 @@ async def evaluate_fake() -> tuple[dict[str, int], list[dict[str, Any]]]:
         )
 
     resolution = (
-        "Verified resolution for INC-2048: Root cause: TTL configuration used "
-        "milliseconds with a seconds-based adapter. Mitigation: rolled back the "
-        "TTL configuration and reissued affected sessions. Verification: checkout "
-        "latency and Redis session misses returned to baseline."
+        "Verified resolution for CF-OUTAGE-2025-12-05: Root cause: a global "
+        "killswitch exposed nil handling in FL1. Mitigation: used a controlled "
+        "rollout and rollback. Verification: traffic was restored by 09:12 UTC."
     )
-    await memory.remember_observation("incident:INC-2048", resolution)
-    await memory.improve_session(DATASET, ["incident:INC-2048"])
+    session_id = "incident:CF-OUTAGE-2025-12-05"
+    await memory.remember_observation(session_id, resolution)
+    await memory.improve_session(DATASET, [session_id])
 
     cases = json.loads(EXPECTED.read_text(encoding="utf-8"))
     scores = {
@@ -53,20 +53,14 @@ async def evaluate_fake() -> tuple[dict[str, int], list[dict[str, Any]]]:
             ),
         )
         answer = " ".join(entry.answer for entry in entries)
-        references = [
-            reference
-            for entry in entries
-            for reference in entry.references
-        ]
+        references = [reference for entry in entries for reference in entry.references]
         documents = {reference.document_name for reference in references}
         document_ok = set(case["expected_documents"]) <= documents
         concepts_ok = all(
-            concept.casefold() in answer.casefold()
-            for concept in case["required_concepts"]
+            concept.casefold() in answer.casefold() for concept in case["required_concepts"]
         )
         forbidden_ok = all(
-            claim.casefold() not in answer.casefold()
-            for claim in case["forbidden_claims"]
+            claim.casefold() not in answer.casefold() for claim in case["forbidden_claims"]
         )
         references_ok = bool(references) and all(
             reference.data_id

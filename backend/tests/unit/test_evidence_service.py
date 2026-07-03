@@ -57,7 +57,7 @@ async def test_accepts_supported_evidence_types(
     result = await service.ingest_upload(
         filename=filename,
         content_type=content_type,
-        content=b"synthetic evidence",
+        content=b"public case-study evidence",
     )
 
     assert result.item.name == filename

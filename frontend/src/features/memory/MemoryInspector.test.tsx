@@ -5,7 +5,7 @@ import { MemoryInspector } from "./MemoryInspector";
 
 const referenced: RecallResult = {
   answer:
-    "deploy-418 changed session TTL handling and resembles the verified INC-1842 Redis incident.",
+    "November 18 is the closest prior incident because both outages used rapid global configuration propagation.",
   verification: "referenced",
   source: "graph",
   search_type: "GRAPH_COMPLETION_CONTEXT_EXTENSION",
@@ -13,16 +13,16 @@ const referenced: RecallResult = {
     {
       data_id: "f6d8b350-0d6b-58b3-a47f-f9755ef8893b",
       chunk_id: "chunk-postmortem-root-cause",
-      document_name: "postmortem-inc-1842.md",
-      snippet: "The missing conversion caused session TTL behavior to diverge.",
+      document_name: "cloudflare-november-18-postmortem.md",
+      snippet: "The feature file was rapidly propagated across the network.",
     },
   ],
   trace_id: "trace-2048",
   why_recalled: [
-    "Same checkout service",
-    "Same Redis dependency",
-    "Same session-miss symptom",
-    "Deploy occurred in the incident window",
+    "same operator: Cloudflare",
+    "same distribution path: global configuration",
+    "same failure pattern: configuration reached the fleet before health gates",
+    "same blast-radius risk: fleet-wide propagation",
   ],
   no_result: false,
   partial_memory: false,
@@ -32,12 +32,12 @@ const evidence: EvidenceItem[] = [
   {
     data_id: referenced.references[0].data_id,
     dataset: "recallops_evidence_v1",
-    name: "postmortem-inc-1842.md",
+    name: "cloudflare-november-18-postmortem.md",
     kind: "postmortem",
-    source_uri: null,
+    source_uri: "https://blog.cloudflare.com/18-november-2025-outage/",
     status: "ready",
     content_hash: "sha256:test",
-    source_date: "2026-05-14T00:00:00Z",
+    source_date: "2025-11-18T00:00:00Z",
     is_stale: false,
     memory_layer: "permanent",
   },
@@ -51,12 +51,12 @@ it("renders exact provenance and all four recall reasons", () => {
     screen.getByText("GRAPH_COMPLETION_CONTEXT_EXTENSION"),
   ).toBeVisible();
   expect(
-    screen.getAllByText("postmortem-inc-1842.md").length,
+    screen.getAllByText("cloudflare-november-18-postmortem.md").length,
   ).toBeGreaterThan(0);
   expect(
     screen.getAllByText("chunk-postmortem-root-cause").length,
   ).toBeGreaterThan(0);
-  expect(screen.getByText(/missing conversion caused/i)).toBeVisible();
+  expect(screen.getByText(/rapidly propagated/i)).toBeVisible();
   fireEvent.click(screen.getByRole("tab", { name: "Path" }));
   for (const reason of referenced.why_recalled) {
     expect(screen.getByText(reason)).toBeVisible();
@@ -64,7 +64,9 @@ it("renders exact provenance and all four recall reasons", () => {
   expect(screen.getAllByText("referenced").length).toBeGreaterThan(0);
 
   fireEvent.click(
-    screen.getByRole("button", { name: /postmortem-inc-1842/i }),
+    screen.getByRole("button", {
+      name: /cloudflare-november-18-postmortem/i,
+    }),
   );
   expect(screen.getByRole("tab", { name: "Evidence" })).toHaveAttribute(
     "aria-selected",

@@ -297,9 +297,7 @@ class CogneeCloudAdapter:
         )
         result_status = _status(result, "deleted")
         normalized_status = (
-            "deleted"
-            if result_status in {"completed", "deleted", "success"}
-            else result_status
+            "deleted" if result_status in {"completed", "deleted", "success"} else result_status
         )
         return ForgetReceipt(status=normalized_status, data_id=data_id)
 

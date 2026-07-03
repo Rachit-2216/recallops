@@ -1,0 +1,23 @@
+{
+  "case_study": "public_postmortem",
+  "record_type": "derived_change_summary",
+  "case_id": "CF-OUTAGE-2025-12-05",
+  "service": "Cloudflare FL1 proxy and WAF rulesets",
+  "deployed_at": "2025-12-05T08:47:00Z",
+  "source_url": "https://blog.cloudflare.com/5-december-2025-outage/",
+  "changes": [
+    {
+      "component": "WAF request-body inspection",
+      "before": "128 KB buffer",
+      "after": "1 MB buffer",
+      "rollout": "gradual"
+    },
+    {
+      "component": "internal WAF testing tool",
+      "before": "enabled",
+      "after": "disabled through a killswitch",
+      "rollout": "global configuration propagated within seconds"
+    }
+  ],
+  "disclosure": "Derived from Cloudflare's official public postmortem; not an internal deployment record."
+}

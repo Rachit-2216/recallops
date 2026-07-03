@@ -44,18 +44,18 @@ async def test_initial_schema_persists_incident_and_evidence(
     session: AsyncSession,
 ) -> None:
     incident = Incident(
-        id="INC-2048",
-        title="Checkout outage",
+        id="CF-OUTAGE-2025-12-05",
+        title="Cloudflare HTTP 500 outage",
         severity="SEV1",
-        service="checkout-api",
+        service="Cloudflare FL1 proxy",
         status="active",
-        session_id="incident:INC-2048",
+        session_id="incident:CF-OUTAGE-2025-12-05",
         started_at=DEMO_START,
     )
     evidence = EvidenceItem(
         data_id=STALE_DATA_ID,
         dataset="recallops_evidence_v1",
-        name="stale-cache-reset-rule.md",
+        name="unsafe-global-killswitch-assumption.md",
         kind="runbook",
         status="ready",
         content_hash="sha256:fixture",
@@ -63,7 +63,7 @@ async def test_initial_schema_persists_incident_and_evidence(
     session.add_all([incident, evidence])
     await session.commit()
 
-    assert await session.get(Incident, "INC-2048") is not None
+    assert await session.get(Incident, "CF-OUTAGE-2025-12-05") is not None
     assert await session.get(EvidenceItem, STALE_DATA_ID) is not None
 
 

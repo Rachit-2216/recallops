@@ -123,11 +123,7 @@ def run_checks() -> list[str]:
     integration_dir = ROOT / "backend" / "tests" / "integration"
     for path in integration_dir.glob("*live*.py"):
         text = path.read_text(encoding="utf-8")
-        if (
-            "RUN_COGNEE_INTEGRATION" not in text
-            or "pytestmark" not in text
-            or "skip" not in text
-        ):
+        if "RUN_COGNEE_INTEGRATION" not in text or "pytestmark" not in text or "skip" not in text:
             failures.append(
                 f"{relative(path)}: live test lacks an explicit opt-in skip gate",
             )

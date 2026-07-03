@@ -10,38 +10,46 @@ test("completes the evidence-to-clean-session judge flow", async ({
   await request.post("/api/demo/seed", {
     headers: { "X-Demo-Admin-Token": "e2e-admin-token" },
   });
-  await page.goto("/app?demo=checkout");
+  await page.goto("/app?demo=cloudflare");
 
   await expect(
     page.getByRole("heading", { name: /memory-assisted incident response/i }),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: /load checkout outage demo/i })
+    .getByRole("button", { name: /load Cloudflare outage case study/i })
     .click();
-  await expect(page).toHaveURL(/\/app\/incidents\/INC-2048/);
-  await expect(page.getByText("INC-2048", { exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/app\/incidents\/CF-OUTAGE-2025-12-05/);
+  await expect(
+    page.getByText("CF-OUTAGE-2025-12-05", { exact: true }),
+  ).toBeVisible();
 
   await page.getByRole("button", { name: /recall evidence/i }).click();
-  await expect(page.getByText(/INC-1842 is the closest prior incident/i)).toBeVisible();
-  await expect(page.getByText(/Redis session TTL behavior/i)).toBeVisible();
+  await expect(
+    page.getByText(/November 18 is the closest prior incident/i),
+  ).toBeVisible();
+  await expect(page.getByText(/global configuration propagation/i)).toBeVisible();
   await expect(page.getByText("referenced", { exact: true }).first()).toBeVisible();
   await expect(
-    page.getByRole("button", { name: /postmortem-inc-1842/i }),
+    page.getByRole("button", {
+      name: /cloudflare-november-18-postmortem/i,
+    }),
   ).toBeVisible();
 
   await page.getByRole("tab", { name: "Path" }).click();
-  await expect(page.getByText(/same dependency: Redis/i)).toBeVisible();
-  await expect(page.getByText(/same timing: immediately after deployment/i)).toBeVisible();
+  await expect(page.getByText(/same distribution path: global configuration/i)).toBeVisible();
+  await expect(page.getByText(/same blast-radius risk: fleet-wide propagation/i)).toBeVisible();
 
   await page
-    .getByRole("button", { name: /stale-cache-reset-rule\.md/i })
+    .getByRole("button", {
+      name: /unsafe-global-killswitch-assumption\.md/i,
+    })
     .click();
   await page.getByRole("tab", { name: "Lifecycle" }).click();
   await page.getByRole("button", { name: "Forget memory" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page
     .getByLabel(/confirmation phrase/i)
-    .fill("FORGET stale-cache-reset-rule.md");
+    .fill("FORGET unsafe-global-killswitch-assumption.md");
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Forget memory" })
@@ -52,13 +60,13 @@ test("completes the evidence-to-clean-session judge flow", async ({
 
   await page
     .getByLabel("Root cause", { exact: true })
-    .fill("deploy-418 passed millisecond TTL values to a seconds-based adapter.");
+    .fill("A fleet-wide killswitch exposed a nil-handling bug in the FL1 rules module.");
   await page
     .getByLabel("Mitigation", { exact: true })
-    .fill("Rolled back the TTL configuration and reissued affected sessions.");
+    .fill("Reverted the global configuration change and restored the prior ruleset state.");
   await page
     .getByLabel("Verification", { exact: true })
-    .fill("Checkout p95 and Redis session misses returned to baseline.");
+    .fill("All traffic was restored by 09:12 UTC and HTTP 500 errors returned to normal.");
   await page.getByLabel(/human confirmation/i).check();
   await page
     .getByRole("button", { name: /promote verified resolution/i })
@@ -67,7 +75,7 @@ test("completes the evidence-to-clean-session judge flow", async ({
 
   await page.getByRole("link", { name: /view proof report/i }).click();
   await expect(
-    page.getByRole("heading", { name: /INC-2048 resolution/i }),
+    page.getByRole("heading", { name: /CF-OUTAGE-2025-12-05 resolution/i }),
   ).toBeVisible();
   const cleanProof = page.getByRole("region", {
     name: /clean-session retrieval proof/i,
@@ -76,9 +84,9 @@ test("completes the evidence-to-clean-session judge flow", async ({
     .getByRole("button", { name: /prove in clean session/i })
     .click();
   await expect(
-    cleanProof.getByText(/verified resolution for INC-2048/i),
+    cleanProof.getByText(/verified resolution for CF-OUTAGE-2025-12-05/i),
   ).toBeVisible();
   await expect(cleanProof.getByText(/Permanent-memory source:/i)).toContainText(
-    "verified-resolution-inc-2048.md",
+    "verified-resolution-cf-outage-2025-12-05.md",
   );
 });

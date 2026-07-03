@@ -1,4 +1,0 @@
-2026-06-28T08:10:00Z level=ERROR service=checkout-api deploy=deploy-418 checkout_p95_ms=4182 message="checkout request exceeded latency objective"
-2026-06-28T08:12:00Z level=ERROR service=checkout-api dependency=redis redis_session_miss_increase_percent=640 message="session lookup missed after TTL configuration change"
-2026-06-28T08:13:00Z level=INFO service=payment-gateway rate_limit_percent=0.1 upstream_p95_ms=118 message="payment gateway metrics remain at baseline"
-2026-06-28T08:14:00Z level=WARN service=checkout-api deploy=deploy-418 minutes_since_deploy=13 message="symptoms began within ten minutes of deployment completion"

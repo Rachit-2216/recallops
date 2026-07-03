@@ -13,10 +13,10 @@ from recallops.memory.fake import FakeCogneeAdapter
 
 FIXTURES = Path(__file__).parents[3] / "demo" / "fixtures"
 INCIDENT = {
-    "id": "INC-2048",
-    "title": "Checkout outage",
+    "id": "INC-5001",
+    "title": "Cloudflare HTTP 500 outage",
     "severity": "SEV1",
-    "service": "checkout-api",
+    "service": "Cloudflare FL1 proxy",
 }
 
 
@@ -50,12 +50,14 @@ def test_create_list_and_detail_incident(
 
     created = client.post("/api/incidents", json=INCIDENT)
     listed = client.get("/api/incidents")
-    detail = client.get("/api/incidents/INC-2048")
+    detail = client.get("/api/incidents/INC-5001")
 
     assert created.status_code == 201
-    assert created.json()["session_id"] == "incident:INC-2048"
+    assert created.json()["session_id"] == "incident:INC-5001"
     assert listed.status_code == 200
-    assert [item["id"] for item in listed.json()["items"]] == ["INC-2048"]
+    assert [item["id"] for item in listed.json()["items"]] == [
+        "INC-5001",
+    ]
     assert detail.status_code == 200
     assert detail.json()["incident"]["status"] == "active"
     assert detail.json()["observations"] == []
@@ -94,8 +96,8 @@ def test_observation_is_saved_to_session_memory(
     client.post("/api/incidents", json=INCIDENT)
 
     response = client.post(
-        "/api/incidents/INC-2048/observe",
-        json={"content": "Redis misses rose after deploy-418."},
+        "/api/incidents/INC-5001/observe",
+        json={"content": "HTTP 500 errors rose after the WAF change."},
     )
 
     assert response.status_code == 200
@@ -110,15 +112,15 @@ def test_pending_observation_retry_reuses_the_same_id(
     client.post("/api/incidents", json=INCIDENT)
     memory.fail_operations.add("remember")
     pending = client.post(
-        "/api/incidents/INC-2048/observe",
-        json={"content": "Redis misses rose after deploy-418."},
+        "/api/incidents/INC-5001/observe",
+        json={"content": "HTTP 500 errors rose after the WAF change."},
     )
     memory.fail_operations.clear()
 
     retried = client.post(
-        "/api/incidents/INC-2048/observe",
+        "/api/incidents/INC-5001/observe",
         json={
-            "content": "Redis misses rose after deploy-418.",
+            "content": "HTTP 500 errors rose after the WAF change.",
             "observation_id": pending.json()["id"],
         },
     )
@@ -127,5 +129,5 @@ def test_pending_observation_retry_reuses_the_same_id(
     assert pending.json()["memory_status"] == "pending"
     assert retried.status_code == 200
     assert retried.json()["id"] == pending.json()["id"]
-    detail = client.get("/api/incidents/INC-2048").json()
+    detail = client.get("/api/incidents/INC-5001").json()
     assert len(detail["observations"]) == 1

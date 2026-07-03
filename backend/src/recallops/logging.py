@@ -31,11 +31,7 @@ def _redact_value(value: Any) -> Any:
 
 def redact_event(event: Mapping[str, Any]) -> dict[str, Any]:
     return {
-        key: (
-            REDACTED
-            if key.casefold() in SENSITIVE_KEYS
-            else _redact_value(value)
-        )
+        key: (REDACTED if key.casefold() in SENSITIVE_KEYS else _redact_value(value))
         for key, value in event.items()
     }
 
