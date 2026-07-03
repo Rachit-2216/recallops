@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import asdict, is_dataclass
+from dataclasses import asdict, is_dataclass, replace
+from io import BytesIO
 from typing import Any, cast
 from uuid import UUID
 
 import cognee
 from cognee.api.v1.serve.cloud_client import CloudClient
 from cognee.api.v1.serve.state import set_remote_client
-from cognee.tasks.ingestion.data_item import DataItem
+from cognee.modules.search.types import SearchType
 
 from recallops.memory.contract import (
     DatasetStatus,
@@ -17,6 +18,7 @@ from recallops.memory.contract import (
     ImproveReceipt,
     MemoryHealth,
     RecallEntry,
+    RecallReference,
     RecallRequest,
     RememberReceipt,
 )
@@ -32,6 +34,22 @@ def _status(result: object, default: str) -> str:
         if isinstance(dict_value, str):
             return dict_value
     return default
+
+
+def _remembered_data_id(result: object) -> str | None:
+    items = result.get("items") if isinstance(result, dict) else getattr(result, "items", None)
+    if not isinstance(items, list):
+        return None
+    for item in items:
+        if isinstance(item, dict) and isinstance(item.get("id"), str):
+            return cast(str, item["id"])
+    return None
+
+
+class _NamedBytesIO(BytesIO):
+    def __init__(self, content: bytes, name: str) -> None:
+        super().__init__(content)
+        self.name = name
 
 
 def _to_plain(value: object) -> object:
@@ -57,6 +75,56 @@ def _dataset_name(dataset: object) -> str | None:
     return name if isinstance(name, str) else None
 
 
+def _chunk_references(
+    raw: object,
+    provider_names: dict[str, str],
+) -> tuple[RecallReference, ...]:
+    plain = _to_plain(raw)
+    rows = plain if isinstance(plain, list) else [plain]
+    chunks: list[dict[object, object]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        text_result = row.get("text_result")
+        if isinstance(text_result, list):
+            chunks.extend(item for item in text_result if isinstance(item, dict))
+            continue
+        metadata = row.get("metadata")
+        raw_item = row.get("raw")
+        if isinstance(metadata, dict) and isinstance(raw_item, dict):
+            chunks.append({**raw_item, **metadata})
+
+    references: list[RecallReference] = []
+    seen_chunks: set[str] = set()
+    for chunk in chunks:
+        data_id = chunk.get("data_id", chunk.get("document_id"))
+        chunk_id = chunk.get("chunk_id", chunk.get("id"))
+        document_name = chunk.get("document_name")
+        snippet = chunk.get("text", chunk.get("content"))
+        if not all(
+            isinstance(value, str) and value
+            for value in (data_id, chunk_id, document_name, snippet)
+        ):
+            continue
+        normalized_chunk_id = cast(str, chunk_id)
+        if normalized_chunk_id in seen_chunks:
+            continue
+        seen_chunks.add(normalized_chunk_id)
+        normalized_data_id = cast(str, data_id)
+        references.append(
+            RecallReference(
+                data_id=normalized_data_id,
+                chunk_id=normalized_chunk_id,
+                document_name=provider_names.get(
+                    normalized_data_id,
+                    cast(str, document_name),
+                ),
+                snippet=cast(str, snippet),
+            ),
+        )
+    return tuple(references)
+
+
 def _create_remote_client(base_url: str, api_key: str) -> CloudClient:
     """Connect in memory without Cognee's on-disk credential cache."""
     client = CloudClient(base_url, api_key)
@@ -72,6 +140,7 @@ class CogneeCloudAdapter:
         self._api_key = api_key
         self._client: Any | None = None
         self._connection_lock = asyncio.Lock()
+        self._provider_names: dict[str, str] = {}
 
     async def _ensure_connected(self) -> Any:
         if self._client is not None:
@@ -135,24 +204,25 @@ class CogneeCloudAdapter:
         payload: EvidencePayload,
     ) -> RememberReceipt:
         await self._ensure_connected()
-        item = DataItem(
-            data=payload.content,
-            label=payload.name,
-            external_metadata={
-                "document_name": payload.name,
-                "recallops_data_id": payload.data_id,
-            },
-            data_id=UUID(payload.data_id),
+        content = (
+            payload.content
+            if isinstance(payload.content, bytes)
+            else payload.content.encode("utf-8")
         )
+        item = _NamedBytesIO(content, payload.name)
         result = await cognee.remember(
-            [item],
+            item,
             dataset_name=payload.dataset,
             self_improvement=False,
             run_in_background=False,
         )
+        provider_data_id = _remembered_data_id(result)
+        if provider_data_id is None:
+            raise RuntimeError("Cognee remember response omitted the provider data ID")
+        self._provider_names[provider_data_id] = payload.name
         return RememberReceipt(
             status=_status(result, "completed"),
-            data_id=payload.data_id,
+            data_id=provider_data_id,
         )
 
     async def remember_observation(
@@ -178,7 +248,23 @@ class CogneeCloudAdapter:
             only_context=request.only_context,
             include_references=True,
         )
-        return normalize_recall(_to_plain(raw))
+        entries = normalize_recall(_to_plain(raw))
+        if not entries or any(entry.references for entry in entries):
+            return entries
+        try:
+            raw_chunks = await cognee.search(
+                query_text=request.query,
+                query_type=SearchType.CHUNKS,
+                datasets=[request.dataset],
+                top_k=5,
+                verbose=request.include_trace,
+            )
+        except Exception:
+            return entries
+        references = _chunk_references(raw_chunks, self._provider_names)
+        if not references:
+            return entries
+        return [replace(entry, references=references) for entry in entries]
 
     async def improve_session(
         self,

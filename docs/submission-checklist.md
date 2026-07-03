@@ -2,11 +2,11 @@
 
 ## Offline verification
 
-- [ ] `uv sync --frozen --group dev`
+- [x] `uv sync --frozen --group dev`
 - [x] `uv run ruff check backend scripts`
 - [x] `uv run mypy`
 - [x] `uv run pytest -m "not integration"`
-- [ ] `npm ci --prefix frontend`
+- [x] `npm ci --prefix frontend`
 - [x] `npm --prefix frontend run lint`
 - [x] `npm --prefix frontend run test`
 - [x] `npm --prefix frontend run build`
@@ -18,33 +18,41 @@
 
 - [x] Offline fake evaluation scores 10/10 for documents, concepts, forbidden
   claims, and reference parsing.
-- [x] Live proof status: intentionally not run until both the dashboard shows
-  more than 8,000,000 credits and valid live configuration is available.
-- [x] Verify Cognee configuration without printing values; the configured base
-  URL is structurally invalid, so no live request was made.
-- [ ] Open the Cognee dashboard and record remaining credits privately.
-- [ ] Confirm the protected reserve is at least 6,000,000 tokens.
-- [ ] Set `RUN_COGNEE_INTEGRATION=1` only for the controlled proof.
-- [ ] Run the live judge lifecycle once, not repeatedly.
+- [x] Cognee configuration was verified without printing values.
+- [x] Read-only dataset connectivity passed against Cognee Cloud.
+- [x] The operator privately confirmed 14,000,000 credits before the proof.
+- [x] The protected reserve was at least 6,000,000 tokens before the proof.
+- [x] `RUN_COGNEE_INTEGRATION=1` was used only for controlled checks.
+- [x] One tiny adapter-contract item was ingested, recalled, and then deleted
+  by its exact provider ID; post-cleanup verification found no matching item.
+- [ ] The live adapter contract passes. Cognee graph recall omitted document
+  references, so RecallOps correctly rejected the result as unverified.
+- [ ] Run the complete live judge lifecycle. It was not attempted after the
+  contract failure, avoiding further credit use.
 - [ ] Recheck the dashboard and stop if projected reserve would be crossed.
 
 ## Free deployment
 
 - [x] Local Docker fallback passes health and the complete Chromium judge flow.
 
-- [ ] Hugging Face Space uses Docker SDK and port 7860.
-- [ ] Hardware remains free `cpu-basic`.
-- [ ] Paid persistent storage is disabled.
-- [ ] Secrets exist only in Space secret storage.
-- [ ] `/api/health` contains no credentials or provider detail.
-- [ ] Cold start restores the synthetic demo.
-- [ ] Deployed judge flow finishes in under 90 seconds.
+- [x] Hugging Face Space uses Docker SDK and port 7860.
+- [x] Hardware remains free `cpu-basic`.
+- [x] Paid persistent storage is disabled.
+- [x] Secrets exist only in Space secret storage.
+- [x] `/api/health` contains no credentials or provider detail.
+- [x] Cold start restores the synthetic demo.
+- [x] Deployed judge flow finishes in under 90 seconds (9.9 seconds).
 
 ## Submission assets
 
-- [ ] Five application screenshots contain no secrets.
+- [ ] Five application screenshots contain no secrets. Four verified captures
+  are in ignored `output/playwright/`; the clean-session proof was verified in
+  the browser, but its fifth screenshot still needs to be saved.
 - [ ] 90-second video follows `demo/demo-script.md`.
-- [ ] Public URL works in a signed-out browser.
-- [ ] Repository URL and commit SHA are recorded.
-- [ ] Synthetic-data and AI-assistance disclosures are visible.
-- [ ] Known limitations match actual behavior.
+- [x] Public URL works in a signed-out Chromium browser:
+  <https://rachitr-recallops.hf.space>.
+- [x] Repository URL and deployed commit are recorded:
+  <https://huggingface.co/spaces/rachitr/recallops>,
+  `da29b9dc7682272d9481d0655530f2bb2ed94587`.
+- [x] Synthetic-data and AI-assistance disclosures are visible.
+- [x] Known limitations match actual behavior.

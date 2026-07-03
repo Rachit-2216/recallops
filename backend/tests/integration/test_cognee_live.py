@@ -39,6 +39,7 @@ async def test_live_adapter_remember_recall_and_forget_one_contract_item() -> No
 
     remembered = await memory.remember_evidence(payload)
     assert remembered.status in {"completed", "running"}
+    assert remembered.data_id is not None
 
     request = RecallRequest(
         query="Which RecallOps contract marker mentions amber-orbit-731?",
@@ -53,11 +54,11 @@ async def test_live_adapter_remember_recall_and_forget_one_contract_item() -> No
         for reference in entry.references
     )
 
-    forgotten = await memory.forget_evidence_item(DATASET, DATA_ID)
+    forgotten = await memory.forget_evidence_item(DATASET, remembered.data_id)
     assert forgotten.status == "deleted"
     after = await memory.recall(request)
     assert all(
-        reference.data_id != DATA_ID
+        reference.data_id != remembered.data_id
         for entry in after
         for reference in entry.references
     )

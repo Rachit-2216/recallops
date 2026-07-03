@@ -881,7 +881,7 @@ settings or exceptions containing request headers. Running without
 Live Cognee probe skipped: set RUN_COGNEE_INTEGRATION=1
 ```
 
-- [ ] **Step 2: Run the read-only probe once**
+- [x] **Step 2: Run the read-only probe once**
 
 Run:
 
@@ -893,9 +893,9 @@ Remove-Item Env:RUN_COGNEE_INTEGRATION
 
 Expected: JSON containing `"connected": true`; no API key appears.
 
-Status on 2026-06-28: the configured `COGNEE_BASE_URL` is not an absolute
-HTTP(S) URL, so the probe stopped before making a request. The SDK-created
-credential cache from the first failed attempt was cleared.
+Status on 2026-07-02: the corrected Cloud URL and key connected successfully.
+The read-only probe returned `"connected": true` and listed two datasets
+without printing credentials.
 
 - [x] **Step 3: Write live adapter integration tests behind a hard gate**
 
@@ -2229,15 +2229,14 @@ uv run python scripts/evaluate_retrieval.py --adapter fake
 
 Expected: all four metrics are 10/10.
 
-- [ ] **Step 4: Check the Cognee dashboard before the live proof**
+- [x] **Step 4: Check the Cognee dashboard before the live proof**
 
 Proceed only if remaining credits are comfortably above 8,000,000 tokens. If
 not, do not run the live proof; use the already-recorded adapter contract and
 preserve the 6,000,000 reserve.
 
-Status (2026-06-28): the configured base URL is structurally invalid and the
-credit dashboard cannot be confirmed from this environment. No live mutation
-was attempted.
+Status (2026-07-02): the operator confirmed 14,000,000 remaining credits before
+the controlled adapter check, above the protected 6,000,000 reserve.
 
 - [ ] **Step 5: Run the live proof once**
 
@@ -2252,10 +2251,12 @@ Remove-Item Env:RUN_COGNEE_INTEGRATION
 Expected: one complete remember/recall/forget/improve/clean-recall lifecycle
 passes. Do not repeat solely to improve timing.
 
-Status (2026-06-28): intentionally skipped because the Step 4 gates are not
-satisfied, preserving the protected reserve.
+Status (2026-07-02): not run. The smaller gated adapter contract first showed
+that Cognee Cloud graph recall omitted document references. RecallOps rejected
+that unverified result, deleted the exact synthetic provider item, verified
+cleanup, and stopped before the larger lifecycle to preserve credits.
 
-- [ ] **Step 6: Rehearse from the deployed URL**
+- [x] **Step 6: Rehearse from the deployed URL**
 
 Wake the free Space, then manually follow `demo/demo-script.md`. Confirm:
 
@@ -2269,8 +2270,11 @@ Wake the free Space, then manually follow `demo/demo-script.md`. Confirm:
 - browser console has no uncaught error
 - no secret appears in network responses
 
-Status (2026-06-28): the Space-ready package is prepared, but no Hugging Face
-token or stored authentication is available, so no public Space was created.
+Status (2026-07-02): the public Docker Space at
+`https://rachitr-recallops.hf.space` passed the complete Chromium judge flow in
+9.9 seconds with no uncaught browser error. The deployment intentionally uses
+the deterministic fake adapter because the live provenance contract above did
+not pass. Health reports no credential or provider detail.
 
 - [x] **Step 7: Final verification**
 

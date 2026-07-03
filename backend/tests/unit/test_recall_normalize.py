@@ -78,6 +78,35 @@ def test_normalizes_alternate_reference_key_names() -> None:
     assert reference.snippet == "Rollback the TTL configuration."
 
 
+def test_normalizes_cognee_1_2_search_result_item_with_evidence_block() -> None:
+    entries = normalize_recall(
+        {
+            "kind": "graph_completion",
+            "search_type": "GRAPH_COMPLETION_CONTEXT_EXTENSION",
+            "text": (
+                "The contract marker is amber-orbit-731.\n\n"
+                "Evidence:\n"
+                "- chunk 1 of document recallops-live-contract.txt "
+                "(data_id: d1d38b21-e5e8-59d3-aa7f-613a16fa960d, "
+                "chunk_id: 22222222-2222-4222-8222-222222222222): "
+                '"RecallOps contract marker 2026-06-28: amber-orbit-731."'
+            ),
+            "metadata": {},
+            "raw": {},
+        },
+    )
+
+    assert entries[0].answer == "The contract marker is amber-orbit-731."
+    assert entries[0].search_type == "GRAPH_COMPLETION_CONTEXT_EXTENSION"
+    assert entries[0].references[0].document_name == "recallops-live-contract.txt"
+    assert entries[0].references[0].data_id == (
+        "d1d38b21-e5e8-59d3-aa7f-613a16fa960d"
+    )
+    assert entries[0].references[0].chunk_id == (
+        "22222222-2222-4222-8222-222222222222"
+    )
+
+
 def test_rejects_unsupported_recall_rows() -> None:
     with pytest.raises(RecallContractError, match="unsupported recall row: int"):
         normalize_recall(42)

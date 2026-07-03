@@ -7,6 +7,7 @@ from recallops.memory.cognee_cloud import CogneeCloudAdapter
 from recallops.memory.contract import EvidencePayload, RecallRequest
 
 DATA_ID = "2f965daf-7da0-5d7f-987b-4ff2d16c9f77"
+REMOTE_DATA_ID = "a16af39d-a8ea-5780-a43c-17b4ba3e1cb3"
 DATASET = "recallops_evidence_v1"
 
 
@@ -22,7 +23,10 @@ async def test_cloud_adapter_maps_remember_and_recall_to_sdk(
 
     async def fake_remember(data: object, **kwargs: object) -> object:
         calls["remember"] = (data, kwargs)
-        return SimpleNamespace(status="completed")
+        return SimpleNamespace(
+            status="completed",
+            items=[{"id": REMOTE_DATA_ID}],
+        )
 
     async def fake_recall(**kwargs: object) -> object:
         calls["recall"] = kwargs
@@ -78,8 +82,8 @@ async def test_cloud_adapter_maps_remember_and_recall_to_sdk(
 
     assert calls["connect"] == ("https://memory.example.test", "test-key")
     remembered, remember_kwargs = calls["remember"]  # type: ignore[misc]
-    assert remembered[0].data_id.hex == DATA_ID.replace("-", "")  # type: ignore[index,union-attr]
-    assert remembered[0].label == "postmortem-inc-1842.md"  # type: ignore[index,union-attr]
+    assert remembered.name == "postmortem-inc-1842.md"  # type: ignore[union-attr]
+    assert remembered.read() == b"TTL units were not converted."  # type: ignore[union-attr]
     assert remember_kwargs == {
         "dataset_name": DATASET,
         "self_improvement": False,
@@ -94,6 +98,7 @@ async def test_cloud_adapter_maps_remember_and_recall_to_sdk(
         "include_references": True,
     }
     assert receipt.status == "completed"
+    assert receipt.data_id == REMOTE_DATA_ID
     assert entries[0].references[0].document_name == "postmortem-inc-1842.md"
 
 
@@ -161,3 +166,89 @@ async def test_cloud_adapter_maps_lifecycle_and_status_calls(
     assert forgotten.status == "deleted"
     assert status.ready is True
     assert health.reachable is True
+
+
+@pytest.mark.asyncio
+async def test_cloud_adapter_adds_chunk_provenance_when_graph_recall_omits_it(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    async def fake_remember(_data: object, **_kwargs: object) -> object:
+        return SimpleNamespace(
+            status="completed",
+            items=[{"id": REMOTE_DATA_ID}],
+        )
+
+    async def fake_recall(**_kwargs: object) -> object:
+        return [
+            {
+                "kind": "graph_completion",
+                "search_type": "GRAPH_COMPLETION_CONTEXT_EXTENSION",
+                "text": "The prior incident had the same TTL mismatch.",
+                "metadata": {},
+                "raw": {},
+            },
+        ]
+
+    async def fake_search(**kwargs: object) -> object:
+        assert kwargs["datasets"] == [DATASET]
+        return [
+            {
+                "dataset_id": "dataset-1",
+                "dataset_name": DATASET,
+                "text_result": [
+                    {
+                        "id": "chunk-1",
+                        "document_id": REMOTE_DATA_ID,
+                        "document_name": "postmortem-inc-1842",
+                        "chunk_index": 0,
+                        "text": "TTL units were not converted.",
+                    },
+                ],
+                "context_result": "TTL units were not converted.",
+                "objects_result": [],
+            },
+        ]
+
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud._create_remote_client",
+        lambda *_: object(),
+    )
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud.cognee.remember",
+        fake_remember,
+    )
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud.cognee.recall",
+        fake_recall,
+    )
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud.cognee.search",
+        fake_search,
+    )
+
+    adapter = CogneeCloudAdapter(
+        base_url="https://memory.example.test",
+        api_key="test-key",
+    )
+    await adapter.remember_evidence(
+        EvidencePayload(
+            data_id=DATA_ID,
+            name="postmortem-inc-1842.md",
+            content="TTL units were not converted.",
+            dataset=DATASET,
+        ),
+    )
+    entries = await adapter.recall(
+        RecallRequest(
+            query="How is this related to the prior incident?",
+            dataset=DATASET,
+            session_id="incident:INC-2048",
+        ),
+    )
+
+    assert entries[0].references == (
+        entries[0].references[0],
+    )
+    assert entries[0].references[0].data_id == REMOTE_DATA_ID
+    assert entries[0].references[0].chunk_id == "chunk-1"
+    assert entries[0].references[0].document_name == "postmortem-inc-1842.md"

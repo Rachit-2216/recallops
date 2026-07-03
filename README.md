@@ -162,11 +162,21 @@ For a free Hugging Face Docker Space:
 2. Push this repository to a Docker Space.
 3. Add only `COGNEE_BASE_URL`, `COGNEE_API_KEY`, and
    `APP_DEMO_ADMIN_TOKEN` as server-side Space secrets.
-4. Set `APP_COGNEE_MODE=live`, `APP_DEMO_MODE=true`, and
+4. Set `APP_COGNEE_MODE=fake`, `APP_DEMO_MODE=true`, and
    `APP_DEMO_BOOTSTRAP=true` as non-secret variables.
 5. Confirm `/api/health`, then rehearse the deployed judge flow once.
 
-The compose fallback defaults to fake memory so it is free and deterministic.
+The verified public deployment is:
+
+- App: <https://rachitr-recallops.hf.space>
+- Space repository: <https://huggingface.co/spaces/rachitr/recallops>
+- Runtime: free `cpu-basic`, Docker SDK, port `7860`
+- Memory mode: deterministic fake adapter
+
+The compose fallback and public Space use fake memory so judging is free and
+deterministic. Switch to live mode only after the configured Cognee Cloud
+endpoint returns reference-bearing graph recall results for the gated adapter
+contract.
 
 ## Screenshots
 
@@ -195,6 +205,11 @@ after the deployed rehearsal passes.
   disabled in public demo mode.
 - Live Cognee mutation tests are deliberately gated and should run only once
   after validating configuration and the protected credit reserve.
+- The configured Cognee Cloud account authenticates, accepts file ingestion,
+  and returns chunk search results. Its graph-completion recall did not include
+  the document references required by the RecallOps evidence contract during
+  the controlled proof, so live mode currently fails closed and the public
+  deployment intentionally uses the deterministic adapter.
 - Free ephemeral hosting can recreate local SQLite state on cold start; stable
   fixture identity keeps the fake fallback deterministic.
 
