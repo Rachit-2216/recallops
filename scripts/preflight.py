@@ -108,15 +108,7 @@ def run_checks() -> list[str]:
             failures.append(f"{name}: contains a Cognee-shaped key value")
         if configured_prefix and configured_prefix in text:
             failures.append(f"{name}: contains the configured Cognee key prefix")
-        instruction_document = (
-            name == "START_CODING_PROMPT.md"
-            or name.startswith("docs/superpowers/")
-        )
-        if (
-            FORGET_EVERYTHING.search(text)
-            and not is_test(path)
-            and not instruction_document
-        ):
+        if FORGET_EVERYTHING.search(text) and not is_test(path):
             failures.append(f"{name}: account-wide forget is forbidden")
         if (
             name.startswith("backend/src/")

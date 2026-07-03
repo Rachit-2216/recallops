@@ -87,8 +87,6 @@ semantics make the judge flow repeatable.
 6. Confirm the real resolution and wait for `promoted`.
 7. Open the proof report and run **Prove in clean session**.
 
-The full narration is in [demo/demo-script.md](demo/demo-script.md).
-
 ## Local setup
 
 Requirements: Python 3.13, uv 0.11.25+, Node 22+, and npm 10+.
