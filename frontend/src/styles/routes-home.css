@@ -5,16 +5,17 @@
 
 .observatory-hero {
   display: grid;
-  min-height: calc(100vh - 170px);
+  min-height: calc(100svh - 198px);
   align-items: center;
-  gap: clamp(36px, 5vw, 86px);
-  grid-template-columns: minmax(380px, 0.82fr) minmax(560px, 1.18fr);
+  gap: clamp(30px, 3.5vw, 64px);
+  grid-template-columns: minmax(0, 0.9fr) minmax(520px, 1.1fr);
 }
 
 .hero-copy {
   position: relative;
   z-index: 3;
-  padding: 52px 0;
+  min-width: 0;
+  padding: clamp(22px, 3vh, 38px) 0;
 }
 
 .hero-kicker {
@@ -31,19 +32,56 @@
   text-transform: uppercase;
 }
 
-.hero-copy h1 {
-  max-width: 780px;
+.hero-title {
+  max-width: 100%;
   margin: 0 0 28px;
-  font-size: clamp(4.3rem, 6.8vw, 8.2rem);
-  line-height: 0.82;
+  font-size: clamp(3.7rem, 4.45vw, 5.65rem);
+  line-height: 0.86;
 }
 
-.hero-copy h1 span {
+.hero-title__lead,
+.hero-title__accent {
   display: block;
+}
+
+.hero-title__lead {
+  color: var(--text);
+  transition:
+    color 260ms ease,
+    text-shadow 260ms ease,
+    transform 320ms var(--ease-orbit);
+}
+
+.hero-title__accent {
   color: transparent;
-  background: linear-gradient(100deg, var(--cyan), #dffcf7 52%, var(--amber));
+  background: linear-gradient(
+    100deg,
+    var(--cyan) 0%,
+    #dffcf7 26%,
+    var(--amber) 52%,
+    #dffcf7 76%,
+    var(--cyan) 100%
+  );
+  background-size: 200% 100%;
+  background-position: 0 50%;
   background-clip: text;
   -webkit-background-clip: text;
+  transition:
+    background-position 520ms var(--ease-orbit),
+    filter 260ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-title:hover .hero-title__lead {
+    color: var(--cyan);
+    text-shadow: 0 0 30px rgba(104, 247, 226, 0.15);
+    transform: translateX(0.025em);
+  }
+
+  .hero-title:hover .hero-title__accent {
+    background-position: 100% 50%;
+    filter: brightness(1.08);
+  }
 }
 
 .hero-copy > p {

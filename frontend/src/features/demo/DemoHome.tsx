@@ -66,9 +66,11 @@ export function DemoHome({
             <StatusBadge tone="session">Public case study</StatusBadge>
             <span>Incident intelligence / evidence first</span>
           </div>
-          <h1 id="demo-title">
-            Turn incident evidence
-            <span>into operational memory.</span>
+          <h1 className="hero-title" id="demo-title">
+            <span className="hero-title__lead">Turn incident evidence</span>
+            <span className="hero-title__accent">
+              into operational memory.
+            </span>
           </h1>
           <p>
             Reconstruct a real outage from evidence derived from official
