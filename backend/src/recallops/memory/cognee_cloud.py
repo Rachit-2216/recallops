@@ -149,6 +149,49 @@ class CogneeCloudAdapter:
         self._client: Any | None = None
         self._connection_lock = asyncio.Lock()
         self._provider_names: dict[str, str] = {}
+        self._provider_data_ids: dict[str, str] = {}
+        self._local_provider_data_ids: dict[str, str] = {}
+
+    def _canonicalize_reference(
+        self,
+        reference: RecallReference,
+    ) -> RecallReference:
+        provider_data_id = reference.data_id
+        if provider_data_id not in self._provider_data_ids:
+            reference_stem = PurePath(reference.document_name).stem
+            matching_provider_ids = [
+                candidate_id
+                for candidate_id, name in self._provider_names.items()
+                if PurePath(name).stem == reference_stem
+            ]
+            if len(matching_provider_ids) == 1:
+                provider_data_id = matching_provider_ids[0]
+        return replace(
+            reference,
+            data_id=self._provider_data_ids.get(
+                provider_data_id,
+                reference.data_id,
+            ),
+            document_name=self._provider_names.get(
+                provider_data_id,
+                reference.document_name,
+            ),
+        )
+
+    def _canonicalize_entries(
+        self,
+        entries: list[RecallEntry],
+    ) -> list[RecallEntry]:
+        return [
+            replace(
+                entry,
+                references=tuple(
+                    self._canonicalize_reference(reference)
+                    for reference in entry.references
+                ),
+            )
+            for entry in entries
+        ]
 
     async def _ensure_connected(self) -> Any:
         if self._client is not None:
@@ -228,6 +271,8 @@ class CogneeCloudAdapter:
         if provider_data_id is None:
             raise RuntimeError("Cognee remember response omitted the provider data ID")
         self._provider_names[provider_data_id] = payload.name
+        self._provider_data_ids[provider_data_id] = payload.data_id
+        self._local_provider_data_ids[payload.data_id] = provider_data_id
         return RememberReceipt(
             status=_status(result, "completed"),
             data_id=provider_data_id,
@@ -256,7 +301,7 @@ class CogneeCloudAdapter:
             only_context=request.only_context,
             include_references=True,
         )
-        entries = normalize_recall(_to_plain(raw))
+        entries = self._canonicalize_entries(normalize_recall(_to_plain(raw)))
         if not entries or any(entry.references for entry in entries):
             return entries
         try:
@@ -272,7 +317,9 @@ class CogneeCloudAdapter:
         references = _chunk_references(raw_chunks, self._provider_names)
         if not references:
             return entries
-        return [replace(entry, references=references) for entry in entries]
+        return self._canonicalize_entries(
+            [replace(entry, references=references) for entry in entries],
+        )
 
     async def improve_session(
         self,
@@ -299,9 +346,10 @@ class CogneeCloudAdapter:
         data_id: str,
     ) -> ForgetReceipt:
         await self._ensure_connected()
+        provider_data_id = self._local_provider_data_ids.get(data_id, data_id)
         result = await cognee.forget(
             dataset=dataset,
-            data_id=UUID(data_id),
+            data_id=UUID(provider_data_id),
         )
         result_status = _status(result, "deleted")
         normalized_status = (

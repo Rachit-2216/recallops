@@ -37,9 +37,9 @@ async def test_cloud_adapter_maps_remember_and_recall_to_sdk(
                 "search_type": "GRAPH_COMPLETION_CONTEXT_EXTENSION",
                 "references": [
                     {
-                        "data_id": DATA_ID,
+                        "data_id": REMOTE_DATA_ID,
                         "chunk_id": "chunk-1",
-                        "document_name": "cloudflare-november-18-postmortem.md",
+                        "document_name": "cloudflare-november-18-postmortem",
                         "snippet": "Configuration propagated across the network.",
                     },
                 ],
@@ -99,6 +99,7 @@ async def test_cloud_adapter_maps_remember_and_recall_to_sdk(
     }
     assert receipt.status == "completed"
     assert receipt.data_id == REMOTE_DATA_ID
+    assert entries[0].references[0].data_id == DATA_ID
     assert entries[0].references[0].document_name == ("cloudflare-november-18-postmortem.md")
 
 
@@ -179,6 +180,7 @@ async def test_cloud_adapter_restores_extension_when_cloud_returns_document_stem
         ),
     )
 
+    assert entries[0].references[0].data_id == DATA_ID
     assert entries[0].references[0].document_name == ("recallops-live-contract.txt")
 
 
@@ -246,6 +248,56 @@ async def test_cloud_adapter_maps_lifecycle_and_status_calls(
     assert forgotten.status == "deleted"
     assert status.ready is True
     assert health.reachable is True
+
+
+@pytest.mark.asyncio
+async def test_cloud_adapter_translates_stable_id_for_forget(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: dict[str, object] = {}
+
+    async def fake_remember(_data: object, **_kwargs: object) -> object:
+        return SimpleNamespace(
+            status="completed",
+            items=[{"id": REMOTE_DATA_ID}],
+        )
+
+    async def fake_forget(**kwargs: object) -> object:
+        calls["forget"] = kwargs
+        return {"status": "deleted"}
+
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud._create_remote_client",
+        lambda *_: object(),
+    )
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud.cognee.remember",
+        fake_remember,
+    )
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud.cognee.forget",
+        fake_forget,
+    )
+
+    adapter = CogneeCloudAdapter(
+        base_url="https://memory.example.test",
+        api_key="test-key",
+    )
+    await adapter.remember_evidence(
+        EvidencePayload(
+            data_id=DATA_ID,
+            name="cloudflare-november-18-postmortem.md",
+            content="Configuration propagated across the network.",
+            dataset=DATASET,
+        ),
+    )
+    forgotten = await adapter.forget_evidence_item(DATASET, DATA_ID)
+
+    assert calls["forget"] == {
+        "dataset": DATASET,
+        "data_id": UUID(REMOTE_DATA_ID),
+    }
+    assert forgotten.data_id == DATA_ID
 
 
 @pytest.mark.asyncio
@@ -327,6 +379,6 @@ async def test_cloud_adapter_adds_chunk_provenance_when_graph_recall_omits_it(
     )
 
     assert entries[0].references == (entries[0].references[0],)
-    assert entries[0].references[0].data_id == REMOTE_DATA_ID
+    assert entries[0].references[0].data_id == DATA_ID
     assert entries[0].references[0].chunk_id == "chunk-1"
     assert entries[0].references[0].document_name == ("cloudflare-november-18-postmortem.md")
