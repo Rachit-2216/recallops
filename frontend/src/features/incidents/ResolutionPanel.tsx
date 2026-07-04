@@ -77,8 +77,8 @@ export function ResolutionPanel({
         ) : null}
       </div>
       <p>
-        These facts remain session-scoped until a human confirms the cited
-        trace and the improve operation succeeds.
+        These facts remain session-scoped until a human confirms the cited trace
+        and the permanent-memory operation succeeds.
       </p>
       <div className="resolution-fields">
         <label>
@@ -136,7 +136,7 @@ export function ResolutionPanel({
           <span>
             <strong>promoted</strong>
             <small>
-              Improve completed after human confirmation{" "}
+              Permanent memory write completed after human confirmation{" "}
               {promotion.data.confirmed_at ?? ""}
             </small>
           </span>

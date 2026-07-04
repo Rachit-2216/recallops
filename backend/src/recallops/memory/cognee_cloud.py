@@ -5,7 +5,7 @@ from dataclasses import asdict, is_dataclass, replace
 from io import BytesIO
 from pathlib import PurePath
 from typing import Any, cast
-from uuid import UUID
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 import cognee
 from cognee.api.v1.serve.cloud_client import CloudClient
@@ -35,6 +35,10 @@ def _status(result: object, default: str) -> str:
         if isinstance(dict_value, str):
             return dict_value
     return default
+
+
+class _RemoteOperationUnsupported(RuntimeError):
+    pass
 
 
 def _remembered_data_id(result: object) -> str | None:
@@ -152,6 +156,7 @@ class CogneeCloudAdapter:
         self._provider_data_ids: dict[str, str] = {}
         self._local_provider_data_ids: dict[str, str] = {}
         self._local_evidence_by_stem: dict[str, tuple[str, str] | None] = {}
+        self._session_observations: dict[str, str] = {}
 
     def _canonicalize_reference(
         self,
@@ -229,6 +234,8 @@ class CogneeCloudAdapter:
             f"{service_url}{path}",
             json=payload,
         ) as response:
+            if response.status in {404, 405}:
+                raise _RemoteOperationUnsupported(path)
             if response.status >= 400:
                 raise RuntimeError("Cognee remote operation failed")
             return await response.json()
@@ -299,6 +306,7 @@ class CogneeCloudAdapter:
             session_id=session_id,
             self_improvement=False,
         )
+        self._session_observations[session_id] = content
         return RememberReceipt(status=_status(result, "session_stored"))
 
     async def recall(self, request: RecallRequest) -> list[RecallEntry]:
@@ -336,15 +344,43 @@ class CogneeCloudAdapter:
         dataset: str,
         session_ids: list[str],
     ) -> ImproveReceipt:
-        result = await self._request_json(
-            "POST",
-            "/api/v1/improve",
-            {
-                "dataset_name": dataset,
-                "session_ids": session_ids,
-                "run_in_background": False,
-            },
-        )
+        try:
+            result = await self._request_json(
+                "POST",
+                "/api/v1/improve",
+                {
+                    "dataset_name": dataset,
+                    "session_ids": session_ids,
+                    "run_in_background": False,
+                },
+            )
+        except _RemoteOperationUnsupported:
+            for session_id in session_ids:
+                content = self._session_observations.get(session_id)
+                if content is None:
+                    raise RuntimeError(
+                        "Cognee promotion requires a remembered session observation",
+                    ) from None
+                incident_slug = session_id.removeprefix("incident:").lower()
+                receipt = await self.remember_evidence(
+                    EvidencePayload(
+                        data_id=str(
+                            uuid5(
+                                NAMESPACE_URL,
+                                f"{dataset}:{session_id}:resolution",
+                            ),
+                        ),
+                        name=f"verified-resolution-{incident_slug}.md",
+                        content=content,
+                        dataset=dataset,
+                    ),
+                )
+                if receipt.status not in {"completed", "running"}:
+                    raise RuntimeError("Cognee permanent promotion failed") from None
+            return ImproveReceipt(
+                status="completed",
+                session_ids=tuple(session_ids),
+            )
         return ImproveReceipt(
             status=_status(result, "completed"),
             session_ids=tuple(session_ids),

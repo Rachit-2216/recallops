@@ -67,6 +67,9 @@ it("requires verified fields and prevents duplicate promotion while pending", as
     confirmed_at: "2026-06-28T10:00:00Z",
   });
   expect((await screen.findAllByText("promoted")).length).toBeGreaterThan(0);
+  expect(
+    await screen.findByText(/permanent memory write completed/i),
+  ).toBeVisible();
 });
 
 it("shows promotion_failed and allows an explicit retry", async () => {

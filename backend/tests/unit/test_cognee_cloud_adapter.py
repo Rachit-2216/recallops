@@ -342,6 +342,89 @@ async def test_cloud_adapter_maps_lifecycle_and_status_calls(
 
 
 @pytest.mark.asyncio
+async def test_cloud_adapter_promotes_resolution_when_improve_route_is_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[object, dict[str, object]]] = []
+
+    class MissingImproveResponse:
+        status = 404
+
+        async def __aenter__(self) -> "MissingImproveResponse":
+            return self
+
+        async def __aexit__(self, *_: object) -> None:
+            return None
+
+    class FakeSession:
+        def request(
+            self,
+            _method: str,
+            _url: str,
+            *,
+            json: dict[str, object],
+        ) -> MissingImproveResponse:
+            calls.append(("improve", json))
+            return MissingImproveResponse()
+
+    class FakeRemoteClient:
+        service_url = "https://memory.example.test"
+
+        async def _get_session(self) -> FakeSession:
+            return FakeSession()
+
+    async def fake_remember(data: object, **kwargs: object) -> object:
+        content = data.read() if hasattr(data, "read") else data
+        calls.append(
+            (
+                {
+                    "content": content,
+                    "name": getattr(data, "name", None),
+                },
+                kwargs,
+            ),
+        )
+        return SimpleNamespace(
+            status="completed",
+            items=[{"id": REMOTE_DATA_ID}],
+        )
+
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud._create_remote_client",
+        lambda *_: FakeRemoteClient(),
+    )
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud.cognee.remember",
+        fake_remember,
+    )
+
+    adapter = CogneeCloudAdapter(
+        base_url="https://memory.example.test",
+        api_key="test-key",
+    )
+    content = (
+        "Verified resolution for CF-OUTAGE-2025-12-05: "
+        "Mitigation: restored the prior ruleset."
+    )
+    await adapter.remember_observation(
+        "incident:CF-OUTAGE-2025-12-05",
+        content,
+    )
+    improved = await adapter.improve_session(
+        DATASET,
+        ["incident:CF-OUTAGE-2025-12-05"],
+    )
+
+    promoted, remember_kwargs = calls[-1]
+    assert promoted == {
+        "content": content.encode(),
+        "name": "verified-resolution-cf-outage-2025-12-05.md",
+    }
+    assert remember_kwargs["dataset_name"] == DATASET
+    assert improved.status == "completed"
+
+
+@pytest.mark.asyncio
 async def test_cloud_adapter_translates_stable_id_for_forget(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
