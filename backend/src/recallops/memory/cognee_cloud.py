@@ -151,21 +151,25 @@ class CogneeCloudAdapter:
         self._provider_names: dict[str, str] = {}
         self._provider_data_ids: dict[str, str] = {}
         self._local_provider_data_ids: dict[str, str] = {}
+        self._local_evidence_by_stem: dict[str, tuple[str, str] | None] = {}
 
     def _canonicalize_reference(
         self,
         reference: RecallReference,
     ) -> RecallReference:
         provider_data_id = reference.data_id
-        if provider_data_id not in self._provider_data_ids:
-            reference_stem = PurePath(reference.document_name).stem
-            matching_provider_ids = [
-                candidate_id
-                for candidate_id, name in self._provider_names.items()
-                if PurePath(name).stem == reference_stem
-            ]
-            if len(matching_provider_ids) == 1:
-                provider_data_id = matching_provider_ids[0]
+        reference_stem = PurePath(reference.document_name).stem
+        local_evidence = self._local_evidence_by_stem.get(reference_stem)
+        if local_evidence is not None:
+            local_data_id, local_name = local_evidence
+            self._provider_data_ids[provider_data_id] = local_data_id
+            self._provider_names[provider_data_id] = local_name
+            self._local_provider_data_ids[local_data_id] = provider_data_id
+            return replace(
+                reference,
+                data_id=local_data_id,
+                document_name=local_name,
+            )
         return replace(
             reference,
             data_id=self._provider_data_ids.get(
@@ -273,6 +277,12 @@ class CogneeCloudAdapter:
         self._provider_names[provider_data_id] = payload.name
         self._provider_data_ids[provider_data_id] = payload.data_id
         self._local_provider_data_ids[payload.data_id] = provider_data_id
+        stem = PurePath(payload.name).stem
+        local_evidence = (payload.data_id, payload.name)
+        if stem not in self._local_evidence_by_stem:
+            self._local_evidence_by_stem[stem] = local_evidence
+        elif self._local_evidence_by_stem[stem] != local_evidence:
+            self._local_evidence_by_stem[stem] = None
         return RememberReceipt(
             status=_status(result, "completed"),
             data_id=provider_data_id,

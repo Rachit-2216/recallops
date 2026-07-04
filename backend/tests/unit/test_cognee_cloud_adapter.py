@@ -8,6 +8,8 @@ from recallops.memory.contract import EvidencePayload, RecallRequest
 
 DATA_ID = "2f965daf-7da0-5d7f-987b-4ff2d16c9f77"
 REMOTE_DATA_ID = "a16af39d-a8ea-5780-a43c-17b4ba3e1cb3"
+SECOND_DATA_ID = "812fc099-53c1-52f6-8200-4fe22ce9ae5d"
+ACTUAL_REMOTE_DATA_ID = "ac3f5419-f749-502f-8274-e5a619a9df48"
 DATASET = "recallops_evidence_v1"
 
 
@@ -182,6 +184,95 @@ async def test_cloud_adapter_restores_extension_when_cloud_returns_document_stem
 
     assert entries[0].references[0].data_id == DATA_ID
     assert entries[0].references[0].document_name == ("recallops-live-contract.txt")
+
+
+@pytest.mark.asyncio
+async def test_cloud_adapter_uses_document_identity_when_remember_receipt_id_is_shared(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: dict[str, object] = {}
+
+    async def fake_remember(_data: object, **_kwargs: object) -> object:
+        return SimpleNamespace(
+            status="completed",
+            items=[{"id": REMOTE_DATA_ID}],
+        )
+
+    async def fake_recall(**_kwargs: object) -> object:
+        return [
+            {
+                "_source": "graph",
+                "answer": "The prior outage used the same propagation path.",
+                "search_type": "GRAPH_COMPLETION_CONTEXT_EXTENSION",
+                "references": [
+                    {
+                        "data_id": ACTUAL_REMOTE_DATA_ID,
+                        "chunk_id": "chunk-prior",
+                        "document_name": "cloudflare-november-18-postmortem",
+                        "snippet": "Configuration propagated across the network.",
+                    },
+                ],
+            },
+        ]
+
+    async def fake_forget(**kwargs: object) -> object:
+        calls["forget"] = kwargs
+        return {"status": "deleted"}
+
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud._create_remote_client",
+        lambda *_: object(),
+    )
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud.cognee.remember",
+        fake_remember,
+    )
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud.cognee.recall",
+        fake_recall,
+    )
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud.cognee.forget",
+        fake_forget,
+    )
+
+    adapter = CogneeCloudAdapter(
+        base_url="https://memory.example.test",
+        api_key="test-key",
+    )
+    await adapter.remember_evidence(
+        EvidencePayload(
+            data_id=DATA_ID,
+            name="cloudflare-november-18-postmortem.md",
+            content="Configuration propagated across the network.",
+            dataset=DATASET,
+        ),
+    )
+    await adapter.remember_evidence(
+        EvidencePayload(
+            data_id=SECOND_DATA_ID,
+            name="cloudflare-december-5-postmortem.md",
+            content="A second incident used the same propagation path.",
+            dataset=DATASET,
+        ),
+    )
+    entries = await adapter.recall(
+        RecallRequest(
+            query="How is this related to the prior incident?",
+            dataset=DATASET,
+            session_id="incident:CF-OUTAGE-2025-12-05",
+        ),
+    )
+    await adapter.forget_evidence_item(DATASET, DATA_ID)
+
+    assert entries[0].references[0].data_id == DATA_ID
+    assert entries[0].references[0].document_name == (
+        "cloudflare-november-18-postmortem.md"
+    )
+    assert calls["forget"] == {
+        "dataset": DATASET,
+        "data_id": UUID(ACTUAL_REMOTE_DATA_ID),
+    }
 
 
 @pytest.mark.asyncio
