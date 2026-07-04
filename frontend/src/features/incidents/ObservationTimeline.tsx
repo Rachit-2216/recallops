@@ -1,4 +1,5 @@
 import { AlertTriangle, Check, RefreshCw } from "lucide-react";
+import { m } from "motion/react";
 
 import type { Observation } from "../../api/recallops";
 
@@ -18,10 +19,21 @@ export function ObservationTimeline({
         <h2 id="timeline-title">{observations.length} observations</h2>
       </div>
       <ol>
-        {observations.map((observation) => {
+        {observations.map((observation, index) => {
           const pending = observation.memory_status === "pending";
           return (
-            <li className="timeline-entry" key={observation.id}>
+            <m.li
+              animate={{ opacity: 1, y: 0 }}
+              className="timeline-entry"
+              initial={{ opacity: 1, y: 10 }}
+              key={observation.id}
+              layout
+              transition={{
+                delay: Math.min(index * 0.045, 0.22),
+                duration: 0.36,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+            >
               <div className="timeline-entry__rail">
                 <span />
               </div>
@@ -61,7 +73,7 @@ export function ObservationTimeline({
                   </button>
                 ) : null}
               </div>
-            </li>
+            </m.li>
           );
         })}
       </ol>

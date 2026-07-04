@@ -7,9 +7,18 @@ function renderWithRouter(component: React.ReactNode) {
   return render(<MemoryRouter>{component}</MemoryRouter>);
 }
 
-it("reserves root and exposes the application navigation", () => {
+it("renders the orbital command deck with clear application navigation", () => {
   renderWithRouter(<AppShell />);
 
+  expect(
+    screen.getByRole("banner", { name: /recallops command deck/i }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("banner", { name: /recallops command deck/i }),
+  ).not.toContainElement(
+    screen.getByRole("navigation", { name: /primary navigation/i }),
+  );
+  expect(screen.getByLabelText(/recallops home/i)).toBeVisible();
   expect(screen.getByRole("link", { name: /incidents/i })).toHaveAttribute(
     "href",
     "/app",
@@ -18,5 +27,10 @@ it("reserves root and exposes the application navigation", () => {
     "href",
     "/app/evidence",
   );
+  expect(screen.getByRole("link", { name: /memory/i })).toHaveAttribute(
+    "href",
+    "/app/memory",
+  );
   expect(screen.getByText(/public case study/i)).toBeVisible();
+  expect(screen.getByText(/offline memory/i)).toBeVisible();
 });

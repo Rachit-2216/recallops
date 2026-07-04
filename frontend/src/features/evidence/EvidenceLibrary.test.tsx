@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 
 import {
   EvidenceLibraryView,
@@ -56,4 +56,23 @@ it("shows stable identity and permanent-memory metadata without public upload", 
   expect(
     screen.queryByRole("button", { name: /upload/i }),
   ).not.toBeInTheDocument();
+});
+
+it("filters the evidence deck without removing records from the audit count", () => {
+  render(<EvidenceLibraryView items={items} publicDemo />);
+
+  fireEvent.change(screen.getByRole("searchbox", { name: /search evidence/i }), {
+    target: { value: "failed" },
+  });
+
+  expect(screen.getByTestId("evidence-failed")).toBeVisible();
+  expect(screen.queryByTestId("evidence-ready")).not.toBeInTheDocument();
+  expect(screen.getByText("5 audited records")).toBeVisible();
+
+  fireEvent.change(screen.getByRole("searchbox", { name: /search evidence/i }), {
+    target: { value: "" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: /show forgotten evidence/i }));
+  expect(screen.getByTestId("evidence-forgotten")).toBeVisible();
+  expect(screen.queryByTestId("evidence-queued")).not.toBeInTheDocument();
 });

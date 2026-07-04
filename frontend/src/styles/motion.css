@@ -1,0 +1,56 @@
+@keyframes orbit-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-16px, 12px, 0);
+  }
+}
+
+@keyframes signal-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.orbital-atmosphere::before {
+  animation: orbit-drift 16s ease-in-out infinite;
+}
+
+.orbital-atmosphere > span,
+.status-badge__dot {
+  animation: signal-breathe 3.2s ease-in-out infinite;
+}
+
+.brand-orbit i {
+  transform-origin: 0 19px;
+  animation: brand-orbit 5s linear infinite;
+}
+
+@keyframes brand-orbit {
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

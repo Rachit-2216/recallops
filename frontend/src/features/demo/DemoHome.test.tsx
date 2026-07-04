@@ -80,6 +80,17 @@ it("opens the attributed Cloudflare public incident case study", async () => {
 
   renderDemo();
   expect(
+    screen.getByRole("heading", {
+      name: /turn incident evidence into operational memory/i,
+    }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("region", { name: /interactive incident memory/i }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("heading", { name: /observe.*recall.*resolve/i }),
+  ).toBeVisible();
+  expect(
     screen.getByText(/derived from official Cloudflare postmortems/i),
   ).toBeVisible();
   expect(

@@ -73,6 +73,12 @@ it("renders the seeded evidence-backed causal path and opens an edge reference",
   expect(screen.getByText("HTTP 500 errors")).toBeVisible();
   expect(screen.getByText("shares blast-radius risk")).toBeVisible();
   expect(screen.getByText("November 18 outage")).toBeVisible();
+  expect(
+    screen.getByRole("list", {
+      name: /evidence-backed relationship list/i,
+    }),
+  ).toBeVisible();
+  expect(screen.getByRole("button", { name: /fit view/i })).toBeVisible();
 
   fireEvent.click(screen.getByTestId("edge-removed"));
   expect(onEvidenceSelect).toHaveBeenCalledWith("evidence-change");

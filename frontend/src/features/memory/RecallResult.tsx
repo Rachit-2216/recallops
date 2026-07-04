@@ -1,4 +1,5 @@
 import { CheckCircle2, CircleSlash, Network } from "lucide-react";
+import { m } from "motion/react";
 
 import type { RecallResult as RecallResultData } from "../../api/recallops";
 import { StatusBadge } from "../../components/StatusBadge";
@@ -6,7 +7,13 @@ import { StatusBadge } from "../../components/StatusBadge";
 export function RecallResult({ result }: { result: RecallResultData }) {
   const referenced = result.verification === "referenced";
   return (
-    <section className="recall-result" aria-labelledby="recall-answer-title">
+    <m.section
+      animate={{ opacity: 1, scale: 1 }}
+      aria-labelledby="recall-answer-title"
+      className="recall-result"
+      initial={{ opacity: 1, scale: 0.985 }}
+      transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div className="recall-result__status">
         {referenced ? (
           <CheckCircle2 size={16} aria-hidden="true" />
@@ -32,6 +39,6 @@ export function RecallResult({ result }: { result: RecallResultData }) {
           <strong>{result.search_type ?? "none"}</strong>
         </span>
       </div>
-    </section>
+    </m.section>
   );
 }

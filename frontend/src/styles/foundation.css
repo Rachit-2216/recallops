@@ -1,0 +1,222 @@
+:root {
+  color-scheme: dark;
+  font-family: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+  font-synthesis: none;
+  color: #f4f6f1;
+  background: #050708;
+  --canvas: #050708;
+  --canvas-soft: #080b0d;
+  --panel: rgba(13, 18, 20, 0.82);
+  --panel-solid: #0d1214;
+  --panel-raised: rgba(20, 27, 29, 0.9);
+  --panel-glass: rgba(9, 14, 16, 0.66);
+  --line: rgba(178, 217, 216, 0.13);
+  --line-strong: rgba(178, 217, 216, 0.28);
+  --text: #f4f6f1;
+  --muted: #9aa9a7;
+  --dim: #687674;
+  --cyan: #68f7e2;
+  --cyan-soft: #83bcb6;
+  --cyan-deep: #123c3b;
+  --amber: #ffb657;
+  --violet: #a99cff;
+  --green: #73e6a5;
+  --red: #ff756d;
+  --display: "Syne", "Arial Black", sans-serif;
+  --mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+  --ease-orbit: cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-panel: 0 32px 90px rgba(0, 0, 0, 0.36);
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--canvas);
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 72% 12%, rgba(40, 123, 117, 0.1), transparent 29rem),
+    radial-gradient(circle at 5% 68%, rgba(109, 84, 44, 0.08), transparent 30rem),
+    var(--canvas);
+  color: var(--text);
+  font-family: var(--mono);
+  text-rendering: optimizeLegibility;
+}
+
+body::before {
+  position: fixed;
+  z-index: -2;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(104, 247, 226, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(104, 247, 226, 0.022) 1px, transparent 1px);
+  background-size: 54px 54px;
+  content: "";
+  mask-image: linear-gradient(to bottom, black, transparent 88%);
+  pointer-events: none;
+}
+
+::selection {
+  color: #031312;
+  background: var(--cyan);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2 {
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+}
+
+.eyebrow,
+.system-label {
+  color: var(--cyan-soft);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.page-header {
+  align-items: end;
+  gap: 32px;
+  margin-bottom: 34px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--line);
+}
+
+.page-header h1,
+.loading-panel h1,
+.error-panel h1 {
+  max-width: 900px;
+  margin: 10px 0 12px;
+  font-size: clamp(2.5rem, 6vw, 5.75rem);
+  line-height: 0.92;
+}
+
+.page-header p {
+  max-width: 720px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: clamp(0.78rem, 1vw, 0.92rem);
+  line-height: 1.75;
+}
+
+.primary-action,
+.secondary-action {
+  position: relative;
+  justify-content: center;
+  min-height: 48px;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms var(--ease-orbit),
+    box-shadow 180ms ease;
+}
+
+.primary-action {
+  overflow: hidden;
+  border: 1px solid var(--cyan);
+  color: #031312;
+  background: var(--cyan);
+  box-shadow: 0 12px 34px rgba(104, 247, 226, 0.17);
+}
+
+.primary-action:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 46px rgba(104, 247, 226, 0.25);
+}
+
+.secondary-action {
+  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.secondary-action:hover:not(:disabled) {
+  border-color: var(--cyan-soft);
+  color: var(--cyan);
+  transform: translateY(-2px);
+}
+
+.status-badge {
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+}
+
+.status-badge__dot {
+  border-radius: 50%;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.text-link {
+  transition:
+    color 160ms ease,
+    transform 160ms var(--ease-orbit);
+}
+
+.text-link:hover {
+  color: var(--cyan);
+  transform: translateX(3px);
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--canvas);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid var(--canvas);
+  border-radius: 999px;
+  background: #273230;
+}

@@ -2,9 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
   BookOpenText,
+  BrainCircuit,
   Database,
   Gauge,
+  Radar,
   RotateCcw,
+  ScanSearch,
   ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
@@ -14,6 +17,7 @@ import { ApiError } from "../../api/client";
 import { recallOpsApi } from "../../api/recallops";
 import { OperationBanner } from "../../components/OperationBanner";
 import { StatusBadge } from "../../components/StatusBadge";
+import { MemoryConstellation } from "../visualization/MemoryConstellation";
 import { PUBLIC_CASE_STUDY } from "./publicCaseStudy";
 
 type DemoHomeProps = {
@@ -56,48 +60,38 @@ export function DemoHome({
 
   return (
     <section className="demo-home" aria-labelledby="demo-title">
-      <header className="page-header">
-        <div>
-          <span className="eyebrow">Public incident case study</span>
-          <h1 id="demo-title">Memory-assisted incident response</h1>
-          <p>
-            Reconstruct an outage from evidence derived from official
-            Cloudflare postmortems, then verify what may enter permanent
-            memory.
-          </p>
-        </div>
-        <StatusBadge tone="session">Public case study</StatusBadge>
-      </header>
-
-      <div className="demo-grid">
-        <article className="demo-card demo-card--primary">
-          <div className="demo-card__index">DEMO / 01</div>
-          <div className="demo-card__title-row">
-            <div>
-              <span className="eyebrow">SEV1 · Cloudflare FL1 proxy</span>
-              <h2>HTTP 500 errors after a global WAF configuration change</h2>
-            </div>
-            <span className="severity-chip">SEV1</span>
+      <div className="observatory-hero">
+        <header className="hero-copy">
+          <div className="hero-kicker">
+            <StatusBadge tone="session">Public case study</StatusBadge>
+            <span>Incident intelligence / evidence first</span>
           </div>
-          <p className="demo-card__summary">
-            Correlate 28% affected HTTP traffic and 25 minutes of impact with
-            the November 18 outage and its shared global-propagation risk.
+          <h1 id="demo-title">
+            Turn incident evidence
+            <span>into operational memory.</span>
+          </h1>
+          <p>
+            Reconstruct a real outage from evidence derived from official
+            Cloudflare postmortems. Trace every recalled claim, resolve the
+            incident, and promote only human-verified learning.
           </p>
 
-          <dl className="signal-grid">
-            <div>
-              <dt>Change</dt>
-              <dd>global WAF config</dd>
-            </div>
-            <div>
-              <dt>Evidence</dt>
-              <dd>{readyEvidence || "—"} ready</dd>
-            </div>
-            <div>
-              <dt>Source</dt>
-              <dd>official postmortems</dd>
-            </div>
-          </dl>
+          <div className="hero-actions">
+            <button
+              className="primary-action"
+              disabled={reset.isPending || seedRequired}
+              onClick={() => reset.mutate()}
+              type="button"
+            >
+              <RotateCcw size={17} aria-hidden="true" />
+              Load Cloudflare outage case study
+              <ArrowRight size={17} aria-hidden="true" />
+            </button>
+            <Link className="secondary-action" to="/app/evidence">
+              <BookOpenText size={16} aria-hidden="true" />
+              Inspect evidence first
+            </Link>
+          </div>
 
           {reset.isPending ? (
             <OperationBanner
@@ -112,16 +106,86 @@ export function DemoHome({
             </p>
           ) : null}
 
-          <button
-            className="primary-action"
-            disabled={reset.isPending || seedRequired}
-            onClick={() => reset.mutate()}
-            type="button"
-          >
-            <RotateCcw size={17} aria-hidden="true" />
-            Load Cloudflare outage case study
-            <ArrowRight size={17} aria-hidden="true" />
-          </button>
+          <dl className="hero-metrics">
+            <div>
+              <dt>Traffic affected</dt>
+              <dd>28%</dd>
+            </div>
+            <div>
+              <dt>Impact window</dt>
+              <dd>25m</dd>
+            </div>
+            <div>
+              <dt>Evidence ready</dt>
+              <dd>{readyEvidence || "—"}</dd>
+            </div>
+          </dl>
+        </header>
+
+        <div className="hero-orbit">
+          <MemoryConstellation />
+        </div>
+      </div>
+
+      <section className="workflow-section" aria-labelledby="workflow-title">
+        <div className="workflow-heading">
+          <span className="eyebrow">One controlled learning loop</span>
+          <h2 id="workflow-title">Observe. Recall. Resolve.</h2>
+          <p>
+            Session observations stay temporary until evidence-backed recall
+            and explicit human confirmation establish a durable fact.
+          </p>
+        </div>
+        <div className="workflow-grid">
+          <article>
+            <span>01 / CAPTURE</span>
+            <Radar size={24} aria-hidden="true" />
+            <h3>Observe the signal</h3>
+            <p>Record timestamped facts without contaminating permanent memory.</p>
+          </article>
+          <article>
+            <span>02 / TRACE</span>
+            <ScanSearch size={24} aria-hidden="true" />
+            <h3>Recall with proof</h3>
+            <p>Inspect the exact graph relationship and source behind each answer.</p>
+          </article>
+          <article>
+            <span>03 / PROMOTE</span>
+            <BrainCircuit size={24} aria-hidden="true" />
+            <h3>Resolve deliberately</h3>
+            <p>Promote verified learning and prove it from a clean incident session.</p>
+          </article>
+        </div>
+      </section>
+
+      <div className="casefile-grid">
+        <article className="demo-card demo-card--primary">
+          <div className="demo-card__index">ACTIVE CASE / 01</div>
+          <div className="demo-card__title-row">
+            <div>
+              <span className="eyebrow">SEV1 · Cloudflare FL1 proxy</span>
+              <h2>HTTP 500 errors after a global WAF configuration change</h2>
+            </div>
+            <span className="severity-chip">SEV1</span>
+          </div>
+          <p className="demo-card__summary">
+            Correlate affected HTTP traffic and 25 minutes of impact with the
+            November 18 outage and its shared global-propagation risk.
+          </p>
+          <dl className="signal-grid">
+            <div>
+              <dt>Change</dt>
+              <dd>global WAF config</dd>
+            </div>
+            <div>
+              <dt>Evidence</dt>
+              <dd>{readyEvidence || "—"} ready</dd>
+            </div>
+            <div>
+              <dt>Source</dt>
+              <dd>official postmortems</dd>
+            </div>
+          </dl>
         </article>
 
         <aside className="readiness-panel" aria-labelledby="readiness-title">

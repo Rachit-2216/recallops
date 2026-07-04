@@ -1,12 +1,31 @@
+import { lazy } from "react";
 import { Navigate, createBrowserRouter } from "react-router-dom";
 
 import { AppShell } from "./app/AppShell";
+import { DeferredRoute } from "./app/DeferredRoute";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { DemoHome } from "./features/demo/DemoHome";
-import { EvidenceLibrary } from "./features/evidence/EvidenceLibrary";
-import { IncidentCockpit } from "./features/incidents/IncidentCockpit";
-import { ResolutionReport } from "./features/incidents/ResolutionReport";
-import { MemoryExplorer } from "./features/memory/MemoryExplorer";
+
+const EvidenceLibrary = lazy(() =>
+  import("./features/evidence/EvidenceLibrary").then((module) => ({
+    default: module.EvidenceLibrary,
+  })),
+);
+const IncidentCockpit = lazy(() =>
+  import("./features/incidents/IncidentCockpit").then((module) => ({
+    default: module.IncidentCockpit,
+  })),
+);
+const ResolutionReport = lazy(() =>
+  import("./features/incidents/ResolutionReport").then((module) => ({
+    default: module.ResolutionReport,
+  })),
+);
+const MemoryExplorer = lazy(() =>
+  import("./features/memory/MemoryExplorer").then((module) => ({
+    default: module.MemoryExplorer,
+  })),
+);
 
 export const router = createBrowserRouter([
   {
@@ -27,19 +46,35 @@ export const router = createBrowserRouter([
       },
       {
         path: "evidence",
-        element: <EvidenceLibrary />,
+        element: (
+          <DeferredRoute>
+            <EvidenceLibrary />
+          </DeferredRoute>
+        ),
       },
       {
         path: "incidents/:incidentId",
-        element: <IncidentCockpit />,
+        element: (
+          <DeferredRoute>
+            <IncidentCockpit />
+          </DeferredRoute>
+        ),
       },
       {
         path: "memory",
-        element: <MemoryExplorer />,
+        element: (
+          <DeferredRoute>
+            <MemoryExplorer />
+          </DeferredRoute>
+        ),
       },
       {
         path: "resolutions/:incidentId",
-        element: <ResolutionReport />,
+        element: (
+          <DeferredRoute>
+            <ResolutionReport />
+          </DeferredRoute>
+        ),
       },
     ],
   },
