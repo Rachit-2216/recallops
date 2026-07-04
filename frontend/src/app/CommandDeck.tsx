@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
   BookOpenText,
@@ -7,6 +8,7 @@ import {
 } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 
+import { recallOpsApi } from "../api/recallops";
 import { StatusBadge } from "../components/StatusBadge";
 
 const navigation = [
@@ -26,6 +28,27 @@ const navigation = [
 ];
 
 export function CommandDeck() {
+  const health = useQuery({
+    queryKey: ["health"],
+    queryFn: ({ signal }) => recallOpsApi.getHealth(signal),
+    refetchInterval: 30_000,
+  });
+  const memory = health.data?.memory;
+  const memoryReady = memory?.reachable === true && memory.dataset_ready;
+  const memoryLabel =
+    memory?.mode === "live"
+      ? "Cognee memory"
+      : memory?.mode === "fake"
+        ? "Offline memory"
+        : "Memory status";
+  const memoryStatus = health.isPending
+    ? "Checking"
+    : memoryReady
+      ? memory?.mode === "live"
+        ? "Connected"
+        : "Ready"
+      : "Degraded";
+
   return (
     <>
       <header
@@ -47,8 +70,8 @@ export function CommandDeck() {
           <StatusBadge tone="session">Public case study</StatusBadge>
           <span className="memory-mode">
             <RadioTower size={14} aria-hidden="true" />
-            <span>Offline memory</span>
-            <strong>Ready</strong>
+            <span>{memoryLabel}</span>
+            <strong>{memoryStatus}</strong>
           </span>
         </div>
       </header>

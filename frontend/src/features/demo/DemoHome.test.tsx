@@ -93,6 +93,7 @@ it("opens the attributed Cloudflare public incident case study", async () => {
   expect(
     screen.getByText(/derived from official Cloudflare postmortems/i),
   ).toBeVisible();
+  expect(screen.getByText(/usage is metered server-side/i)).toBeVisible();
   expect(
     screen.getByRole("link", { name: /December 5 outage postmortem/i }),
   ).toHaveAttribute(

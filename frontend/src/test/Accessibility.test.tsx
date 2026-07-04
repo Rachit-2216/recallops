@@ -85,11 +85,26 @@ afterEach(() => {
 });
 
 it("has no automated accessibility violations in the application shell", async () => {
-  const { container } = render(
-    <MemoryRouter>
-      <AppShell />
-    </MemoryRouter>,
+  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        status: "ok",
+        database: "ok",
+        memory: { mode: "live", reachable: true, dataset_ready: true },
+        demo_mode: true,
+        credit_guard: { protected_reserve: 6_000_000 },
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    ),
   );
+  const { container } = render(
+    queryProvider(
+      <MemoryRouter>
+        <AppShell />
+      </MemoryRouter>,
+    ),
+  );
+  expect(await screen.findByText("Connected")).toBeVisible();
   expect((await axe(container)).violations).toEqual([]);
 });
 

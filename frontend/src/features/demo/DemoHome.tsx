@@ -253,9 +253,9 @@ export function DemoHome({
           <div className="budget-readout">
             <Gauge size={18} aria-hidden="true" />
             <div>
-              <span>Estimated internal cost</span>
-              <strong>0 live credits</strong>
-              <small>Protected reserve remains untouched in offline mode.</small>
+              <span>Memory usage</span>
+              <strong>Reserve protected</strong>
+              <small>Usage is metered server-side when live.</small>
             </div>
           </div>
           <Link className="text-link" to="/app/evidence">

@@ -1,13 +1,43 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { afterEach, vi } from "vitest";
 
 import { AppShell } from "./AppShell";
 
 function renderWithRouter(component: React.ReactNode) {
-  return render(<MemoryRouter>{component}</MemoryRouter>);
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>{component}</MemoryRouter>
+    </QueryClientProvider>,
+  );
 }
 
-it("renders the orbital command deck with clear application navigation", () => {
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+it("renders the orbital command deck with live Cognee status", async () => {
+  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        status: "ok",
+        database: "ok",
+        memory: {
+          mode: "live",
+          reachable: true,
+          dataset_ready: true,
+        },
+        demo_mode: true,
+        credit_guard: { protected_reserve: 6_000_000 },
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    ),
+  );
+
   renderWithRouter(<AppShell />);
 
   expect(
@@ -32,5 +62,6 @@ it("renders the orbital command deck with clear application navigation", () => {
     "/app/memory",
   );
   expect(screen.getByText(/public case study/i)).toBeVisible();
-  expect(screen.getByText(/offline memory/i)).toBeVisible();
+  expect(await screen.findByText(/cognee memory/i)).toBeVisible();
+  expect(screen.getByText(/^connected$/i)).toBeVisible();
 });

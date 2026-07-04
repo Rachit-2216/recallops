@@ -2,6 +2,20 @@ import { z } from "zod";
 
 import { request } from "./client";
 
+export const healthSchema = z.object({
+  status: z.enum(["ok", "degraded"]),
+  database: z.string(),
+  memory: z.object({
+    mode: z.enum(["fake", "live"]),
+    reachable: z.boolean(),
+    dataset_ready: z.boolean(),
+  }),
+  demo_mode: z.boolean(),
+  credit_guard: z.object({
+    protected_reserve: z.number(),
+  }),
+});
+
 export const evidenceStatusSchema = z.enum([
   "queued",
   "processing",
@@ -154,6 +168,12 @@ const forgetResultSchema = z.object({
 export type ForgetResult = z.infer<typeof forgetResultSchema>;
 
 export const recallOpsApi = {
+  getHealth(signal?: AbortSignal) {
+    return request("/api/health", {
+      schema: healthSchema,
+      signal,
+    });
+  },
   listEvidence(signal?: AbortSignal) {
     return request("/api/evidence", {
       schema: evidenceListSchema,
