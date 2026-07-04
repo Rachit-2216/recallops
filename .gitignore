@@ -3,6 +3,7 @@
 !.env.example
 
 .superpowers/
+.worktrees/
 work/
 START_CODING_PROMPT.md
 docs/superpowers/
