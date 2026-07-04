@@ -103,6 +103,86 @@ async def test_cloud_adapter_maps_remember_and_recall_to_sdk(
 
 
 @pytest.mark.asyncio
+async def test_cloud_adapter_restores_extension_when_cloud_returns_document_stem(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    async def fake_remember(_data: object, **_kwargs: object) -> object:
+        return SimpleNamespace(
+            status="completed",
+            items=[{"id": REMOTE_DATA_ID}],
+        )
+
+    async def fake_recall(**_kwargs: object) -> object:
+        return [
+            {
+                "kind": "graph_completion",
+                "search_type": "GRAPH_COMPLETION",
+                "text": "The contract item was found.",
+                "metadata": {},
+                "raw": {},
+            },
+        ]
+
+    async def fake_search(**_kwargs: object) -> object:
+        return [
+            {
+                "dataset_id": "dataset-1",
+                "dataset_name": DATASET,
+                "text_result": [
+                    {
+                        "id": "chunk-1",
+                        "document_id": "different-cloud-document-id",
+                        "document_name": "recallops-live-contract",
+                        "chunk_index": 0,
+                        "text": "The marker is amber-orbit-731.",
+                    },
+                ],
+                "context_result": "The marker is amber-orbit-731.",
+                "objects_result": [],
+            },
+        ]
+
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud._create_remote_client",
+        lambda *_: object(),
+    )
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud.cognee.remember",
+        fake_remember,
+    )
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud.cognee.recall",
+        fake_recall,
+    )
+    monkeypatch.setattr(
+        "recallops.memory.cognee_cloud.cognee.search",
+        fake_search,
+    )
+
+    adapter = CogneeCloudAdapter(
+        base_url="https://memory.example.test",
+        api_key="test-key",
+    )
+    await adapter.remember_evidence(
+        EvidencePayload(
+            data_id=DATA_ID,
+            name="recallops-live-contract.txt",
+            content="The marker is amber-orbit-731.",
+            dataset=DATASET,
+        ),
+    )
+    entries = await adapter.recall(
+        RecallRequest(
+            query="Which contract item has the marker?",
+            dataset=DATASET,
+            session_id="incident:contract-probe",
+        ),
+    )
+
+    assert entries[0].references[0].document_name == ("recallops-live-contract.txt")
+
+
+@pytest.mark.asyncio
 async def test_cloud_adapter_maps_lifecycle_and_status_calls(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

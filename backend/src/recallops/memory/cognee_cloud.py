@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from dataclasses import asdict, is_dataclass, replace
 from io import BytesIO
+from pathlib import PurePath
 from typing import Any, cast
 from uuid import UUID
 
@@ -111,14 +112,21 @@ def _chunk_references(
             continue
         seen_chunks.add(normalized_chunk_id)
         normalized_data_id = cast(str, data_id)
+        normalized_document_name = cast(str, document_name)
+        remembered_name = provider_names.get(normalized_data_id)
+        if remembered_name is None:
+            stem_matches = {
+                name
+                for name in provider_names.values()
+                if PurePath(name).stem == normalized_document_name
+            }
+            if len(stem_matches) == 1:
+                remembered_name = stem_matches.pop()
         references.append(
             RecallReference(
                 data_id=normalized_data_id,
                 chunk_id=normalized_chunk_id,
-                document_name=provider_names.get(
-                    normalized_data_id,
-                    cast(str, document_name),
-                ),
+                document_name=remembered_name or normalized_document_name,
                 snippet=cast(str, snippet),
             ),
         )
