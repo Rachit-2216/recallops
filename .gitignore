@@ -5,10 +5,10 @@
 .superpowers/
 .worktrees/
 work/
-START_CODING_PROMPT.md
-docs/superpowers/
-docs/submission-checklist.md
-demo/demo-script.md
+*_PROMPT.md
+**/superpowers/
+docs/*checklist*.md
+demo/*script*.md
 
 __pycache__/
 *.py[cod]

@@ -51,17 +51,18 @@ the surrounding incident history.
 
 ## Why Cognee
 
-[Cognee](https://www.cognee.ai/) provides the memory layer used to organize and
+[Cognee](https://docs.cognee.ai/) provides the memory layer used to organize and
 retrieve operational knowledge:
 
 - `remember` stores durable evidence and session-scoped observations.
 - `recall` returns context with evidence references.
-- `improve` promotes verified incident learning.
 - `forget` removes obsolete memory items.
 
 RecallOps adds the operational controls around that memory layer: provenance,
 stable evidence identity, human approval gates, audit records, protected usage
-limits, and explicit degraded states.
+limits, and explicit degraded states. Human-verified resolutions are promoted
+into permanent Cognee memory through a provider-compatible lifecycle that uses
+`improve` when available and a durable evidence write otherwise.
 
 ## Architecture
 
